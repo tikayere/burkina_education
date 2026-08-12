@@ -162,7 +162,7 @@ def get_attendance_summary(student, from_date, to_date):
 	rows = frappe.get_all(
 		"Student Attendance",
 		filters={"student": student, "docstatus": 1, "date": ["between", (from_date, to_date)]},
-		fields=["status", "count(name) as count"],
+		fields=["status", {"COUNT": "name", "as": "count"}],
 		group_by="status",
 	)
 

@@ -56,8 +56,10 @@ def after_install():
 	create_roles()
 	create_custom_fields(get_custom_fields(), ignore_validate=True)
 	create_property_setters()
+	create_client_scripts()
 	create_finance_permissions()
 	enable_xof_currency()
+	ensure_item_group_root()
 	ensure_stock_uom_default()
 	ensure_erpnext_custom_fields()
 	ensure_default_price_lists()
@@ -123,6 +125,46 @@ def _set_property(doctype, fieldname, property, value):
 	)
 
 
+#: Client Scripts that extend a *stock* Frappe/ERPNext/Education DocType's
+#: Desk UI without touching its source - the JS equivalent of
+#: create_property_setters() above. Our own DocTypes get their client
+#: scripts the normal way (a same-named .js file next to the .json), so this
+#: list only needs an entry per vendor DocType we extend.
+CLIENT_SCRIPTS = [
+	{
+		"name": "Burkina Education: Sales Invoice Mobile Money Button",
+		"dt": "Sales Invoice",
+		"view": "Form",
+		"script_path": ("finance", "client_scripts", "sales_invoice_mobile_money.js"),
+	},
+]
+
+
+def create_client_scripts():
+	for spec in CLIENT_SCRIPTS:
+		script_path = frappe.get_app_path("burkina_education", *spec["script_path"])
+		with open(script_path) as f:
+			script = f.read()
+
+		existing = frappe.db.get_value("Client Script", {"dt": spec["dt"], "view": spec["view"]})
+		if existing:
+			frappe.db.set_value("Client Script", existing, "script", script)
+			continue
+
+		# Client Script has no autoname (autoname: "Prompt") - an explicit
+		# name is mandatory or insert() throws "Please set the document name".
+		frappe.get_doc(
+			{
+				"doctype": "Client Script",
+				"name": spec["name"],
+				"dt": spec["dt"],
+				"view": spec["view"],
+				"script": script,
+				"enabled": 1,
+			}
+		).insert(ignore_permissions=True)
+
+
 def create_roles():
 	for role in NEW_ROLES:
 		if not frappe.db.exists("Role", role):
@@ -168,14 +210,25 @@ def ensure_erpnext_custom_fields():
 	create_address_and_contact_custom_fields()
 
 
+#: Deliberately NOT named "Standard Buying"/"Standard Selling" - ERPNext's own
+#: generic test bootstrap (``erpnext.tests.utils.BootStrapTestData.make_price_list``)
+#: hardcodes those exact names with ``currency: "INR"``, and its existence
+#: check matches on name+currency+buying+selling together, so an XOF version
+#: under the same name doesn't satisfy it and it tries (and fails) to insert
+#: a second "Standard Buying"/"Standard Selling" - a duplicate key. Distinct
+#: names sidestep the collision entirely; only Selling/Buying Settings need
+#: to point at them, nothing else references these by their literal name.
+XOF_PRICE_LISTS = (("Standard Buying (XOF)", 0), ("Standard Selling (XOF)", 1))
+
+
 def ensure_default_price_lists():
-	"""``Standard Buying``/``Standard Selling`` are normally created by the
-	Setup Wizard (``install_fixtures.install_defaults``) — skipped in this
-	dev environment. Without them, every Sales Invoice fails mandatory
-	validation on ``selling_price_list``/``price_list_currency`` regardless
-	of which Company it's for, so these are created once, XOF, shared across
-	every company (Price List isn't company-scoped in ERPNext)."""
-	for name, selling in (("Standard Buying", 0), ("Standard Selling", 1)):
+	"""Price Lists are normally created by the Setup Wizard
+	(``install_fixtures.install_defaults``) — skipped in this dev environment.
+	Without one, every Sales Invoice fails mandatory validation on
+	``selling_price_list``/``price_list_currency`` regardless of which Company
+	it's for, so these are created once, XOF, shared across every company
+	(Price List isn't company-scoped in ERPNext)."""
+	for name, selling in XOF_PRICE_LISTS:
 		if frappe.db.exists("Price List", name):
 			continue
 		frappe.get_doc(
@@ -189,10 +242,50 @@ def ensure_default_price_lists():
 			}
 		).insert(ignore_permissions=True)
 
+	selling_name = XOF_PRICE_LISTS[1][0]
+	buying_name = XOF_PRICE_LISTS[0][0]
 	if not frappe.db.get_single_value("Selling Settings", "selling_price_list"):
-		frappe.db.set_single_value("Selling Settings", "selling_price_list", "Standard Selling")
+		frappe.db.set_single_value("Selling Settings", "selling_price_list", selling_name)
 	if not frappe.db.get_single_value("Buying Settings", "buying_price_list"):
-		frappe.db.set_single_value("Buying Settings", "buying_price_list", "Standard Buying")
+		frappe.db.set_single_value("Buying Settings", "buying_price_list", buying_name)
+
+
+def ensure_item_group_root():
+	"""Education's Fee Category creates its ``Item``s under an ad-hoc "Fee
+	Component" Item Group (see ``create_item()`` in Education's fee_category.py)
+	without first checking that ERPNext's own canonical root ("All Item
+	Groups", normally seeded by the Setup Wizard — skipped here, see
+	``ensure_default_price_lists()`` above) exists. ``get_root_of()`` then
+	picks "Fee Component" itself up as the tree's root, so it's stuck with no
+	parent — invalid ERPNext data (a rootless non-"All Item Groups" node) that
+	only surfaces when something needs the real root by its hardcoded name,
+	e.g. ERPNext's own test fixtures (``erpnext.tests.utils.make_item_group``).
+	Idempotent: re-parents the ad-hoc root under the canonical one and rebuilds
+	the nested set, safe to re-run."""
+	from frappe.utils.nestedset import rebuild_tree
+
+	root_name = "All Item Groups"
+	if not frappe.db.exists("Item Group", root_name):
+		frappe.get_doc(
+			{
+				"doctype": "Item Group",
+				"item_group_name": root_name,
+				"is_group": 1,
+				"parent_item_group": "",
+			}
+		).insert(ignore_permissions=True)
+
+	stray_root = frappe.db.get_value(
+		"Item Group", {"parent_item_group": ["in", ["", None]], "name": ["!=", root_name]}
+	)
+	if stray_root:
+		frappe.db.set_value("Item Group", stray_root, "parent_item_group", root_name)
+		if frappe.db.count("Item Group", {"parent_item_group": stray_root}):
+			# It has children of its own now (e.g. "Fee Component" > "Products"/
+			# "Services"/...) so it must be flagged as a group, or ERPNext's own
+			# Item Group validation rejects it.
+			frappe.db.set_value("Item Group", stray_root, "is_group", 1)
+		rebuild_tree("Item Group")
 
 
 def ensure_stock_uom_default():
