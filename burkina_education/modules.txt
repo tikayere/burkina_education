@@ -2,6 +2,7 @@ School
 Academic
 Attendance
 Examinations
+Finance
 Student
 Guardian
 Admissions

@@ -32,6 +32,23 @@ NEW_ROLES = [
 	"Boarding Manager",
 	"Clinic Staff",
 	"IT Administrator",
+	# Phase 3 (Finance, docs/architecture.md section H): master.md §3 names
+	"Accountant",  # this role specifically; ERPNext's own "Accounts Manager"/
+	# "Accounts User" are broader (multi-company, HR-adjacent) and not reused.
+]
+
+#: Finance doctypes (ours + stock Frappe/ERPNext/Education ones) the
+#: Accountant role needs — deliberately does NOT include any Academic-module
+#: doctype (master.md §64: "accountant cannot modify grades").
+ACCOUNTANT_DOCTYPES_FULL = [
+	"Sales Invoice",
+	"Sales Order",
+	"Payment Entry",
+	"Payment Request",
+	"Fee Category",
+	"Fee Structure",
+	"Fee Schedule",
+	"Fees",
 ]
 
 
@@ -39,6 +56,11 @@ def after_install():
 	create_roles()
 	create_custom_fields(get_custom_fields(), ignore_validate=True)
 	create_property_setters()
+	create_finance_permissions()
+	enable_xof_currency()
+	ensure_stock_uom_default()
+	ensure_erpnext_custom_fields()
+	ensure_default_price_lists()
 	ensure_default_settings()
 
 
@@ -107,6 +129,80 @@ def create_roles():
 			frappe.get_doc({"doctype": "Role", "role_name": role, "desk_access": 1}).insert(
 				ignore_permissions=True
 			)
+
+
+def create_finance_permissions():
+	"""Grant the Accountant role full rights on Sales Invoice/Payment
+	Entry/Fee* — the same mechanism (Custom DocPerm via ``add_permission``)
+	Education's own ``install.py`` uses to grant the Student role rights on
+	Sales Invoice, so it composes rather than replacing standard permission
+	rows (docs/architecture.md section H).
+	"""
+	from frappe.permissions import add_permission, update_permission_property
+
+	for doctype in ACCOUNTANT_DOCTYPES_FULL:
+		add_permission(doctype, "Accountant", 0)
+		for ptype in ("read", "write", "create", "print", "email", "report", "export"):
+			update_permission_property(doctype, "Accountant", 0, ptype, 1)
+
+
+def enable_xof_currency():
+	"""XOF (Franc CFA) ships disabled by default; the Setup Wizard would
+	normally enable a school's chosen currency — skipped in this dev
+	environment (see docs/installation.md), so enable it explicitly here."""
+	if not frappe.db.get_value("Currency", "XOF", "enabled"):
+		frappe.db.set_value("Currency", "XOF", "enabled", 1)
+
+
+def ensure_erpnext_custom_fields():
+	"""``erpnext.setup.install.create_address_and_contact_custom_fields()``
+	(which adds ``Contact.is_billing_contact`` — read unconditionally by
+	``erpnext.accounts.party.get_default_contact``) normally runs as part of
+	``erpnext``'s own ``after_install`` when ``erpnext`` itself is installed,
+	but was missing on this dev site. Calling just this one function (not the
+	full ``after_install``, which also touches Role Profiles and other
+	state that isn't safe to insert twice) closes the gap; ``create_custom_fields``
+	is idempotent on its own."""
+	from erpnext.setup.install import create_address_and_contact_custom_fields
+
+	create_address_and_contact_custom_fields()
+
+
+def ensure_default_price_lists():
+	"""``Standard Buying``/``Standard Selling`` are normally created by the
+	Setup Wizard (``install_fixtures.install_defaults``) — skipped in this
+	dev environment. Without them, every Sales Invoice fails mandatory
+	validation on ``selling_price_list``/``price_list_currency`` regardless
+	of which Company it's for, so these are created once, XOF, shared across
+	every company (Price List isn't company-scoped in ERPNext)."""
+	for name, selling in (("Standard Buying", 0), ("Standard Selling", 1)):
+		if frappe.db.exists("Price List", name):
+			continue
+		frappe.get_doc(
+			{
+				"doctype": "Price List",
+				"price_list_name": name,
+				"enabled": 1,
+				"buying": 0 if selling else 1,
+				"selling": selling,
+				"currency": "XOF",
+			}
+		).insert(ignore_permissions=True)
+
+	if not frappe.db.get_single_value("Selling Settings", "selling_price_list"):
+		frappe.db.set_single_value("Selling Settings", "selling_price_list", "Standard Selling")
+	if not frappe.db.get_single_value("Buying Settings", "buying_price_list"):
+		frappe.db.set_single_value("Buying Settings", "buying_price_list", "Standard Buying")
+
+
+def ensure_stock_uom_default():
+	"""Education's Fee Category auto-creates a (non-stock, service) Item per
+	fee component, but never sets ``stock_uom`` — normally pre-filled by the
+	Setup Wizard/Item form JS, neither of which run for a server-side insert
+	in this headless dev environment (see docs/installation.md). A Property
+	Setter default is the same mechanism the Setup Wizard itself would have
+	used, and it's honoured by any new-document creation, not just the UI."""
+	_set_property("Item", "stock_uom", "default", "Nos")
 
 
 def ensure_default_settings():

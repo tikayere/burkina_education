@@ -1,0 +1,40 @@
+{
+ "actions": [],
+ "creation": "2026-08-12 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "sibling_rank",
+  "discount_percent"
+ ],
+ "fields": [
+  {
+   "description": "Rang de l'enfant dans la fratrie inscrite (1 = premier enfant). La règle avec le rang le plus élevé encore ≤ au rang de l'élève s'applique (ex: une règle \"3\" couvre aussi le 4e enfant et au-delà).",
+   "fieldname": "sibling_rank",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Rang dans la fratrie",
+   "reqd": 1
+  },
+  {
+   "fieldname": "discount_percent",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Pourcentage de réduction",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-08-12 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Finance",
+ "name": "Sibling Discount Rule",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

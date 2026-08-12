@@ -19,7 +19,9 @@
   "student_id_naming_format",
   "column_break_naming",
   "admission_naming_format",
-  "payment_naming_format"
+  "payment_naming_format",
+  "section_break_finance",
+  "sibling_discount_rules"
  ],
  "fields": [
   {
@@ -113,6 +115,18 @@
    "fieldname": "payment_naming_format",
    "fieldtype": "Data",
    "label": "Format Numéro de Paiement"
+  },
+  {
+   "fieldname": "section_break_finance",
+   "fieldtype": "Section Break",
+   "label": "Finance — réductions fratrie"
+  },
+  {
+   "description": "Réduction automatique appliquée aux factures de frais scolaires selon le rang de l'élève parmi ses frères et sœurs inscrits (voir finance.discounts). Laisser vide pour désactiver.",
+   "fieldname": "sibling_discount_rules",
+   "fieldtype": "Table",
+   "label": "Règles de réduction fratrie",
+   "options": "Sibling Discount Rule"
   }
  ],
  "icon": "fa fa-cog",

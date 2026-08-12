@@ -128,9 +128,12 @@ after_install = "burkina_education.setup.install.after_install"
 # ---------------
 # Override standard doctype classes
 
-# override_doctype_class = {
-# 	"ToDo": "custom_app.overrides.CustomToDo"
-# }
+override_doctype_class = {
+	# Fixes a genuine Education/Frappe-version incompatibility that breaks
+	# every Fee Schedule save - see finance/overrides.py and
+	# docs/architecture.md section H.
+	"Fee Schedule": "burkina_education.finance.overrides.FeeSchedule",
+}
 
 # Document Events
 # ---------------
@@ -144,6 +147,14 @@ doc_events = {
 		# rights (docs/architecture.md section G explains why this is a hook,
 		# not a Custom DocPerm rewrite).
 		"before_cancel": "burkina_education.academic.grading.guard_assessment_result_cancel",
+	},
+	"Sales Invoice": {
+		# Only acts on school-fee invoices (Education's student/fee_schedule
+		# custom fields) - applies a student's Scholarship/sibling discount by
+		# setting Sales Invoice's own additional_discount_percentage, then
+		# reuses the accounts controller to recompute totals (docs/architecture.md
+		# section H).
+		"validate": "burkina_education.finance.discounts.apply_scholarship_and_sibling_discount",
 	},
 }
 
