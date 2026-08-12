@@ -8,13 +8,19 @@ repeatedly (``bench execute burkina_education.setup.demo_data.run``); every
 step checks for an existing record before creating one.
 
 Phase 1: school, academic structure, subjects, students/guardians.
-Phase 2 (this file, added alongside the grading engine): a Grading Scheme,
-Assessment Types, one Student Group per demo grade, a first-term Assessment
-Plan/Result per student, Student Attendance, and a computed+ranked+submitted
-Student Term Report per student - so the whole Phase 2 chain (marks -> lock
--> compute -> rank -> bulletin) has real, inspectable demo data instead of
-only being covered by unit tests. Fees/report cards for other terms and
-Phase 3+ modules are seeded once those are built.
+Phase 2: a Grading Scheme, Assessment Types, one Student Group per demo
+grade, a first-term Assessment Plan/Result per student, Student Attendance,
+and a computed+ranked+submitted Student Term Report per student - so the
+whole Phase 2 chain (marks -> lock -> compute -> rank -> bulletin) has real,
+inspectable demo data instead of only being covered by unit tests.
+Phase 3 (this file, added alongside the finance module): a Company (XOF),
+Fee Category/Structure/Schedule per demo grade, a Scholarship, one Sales
+Invoice per demo student (Education's own ``create_sales_invoice`` -
+exercising the scholarship/sibling discount hook for real), one paid in cash
+(Payment Entry), one paid via a simulated Mobile Money round-trip
+(initiate -> webhook -> Payment Entry), one left outstanding so "outstanding
+fees" reporting has something to show. Phase 4+ modules are seeded once
+those are built.
 """
 
 import frappe
@@ -50,6 +56,28 @@ ASSESSMENT_TYPES = [
 
 # Subjects a first-term Assessment Plan/Result is seeded for, per student.
 DEMO_RESULT_SUBJECTS = ["Français", "Mathématiques"]
+
+COMPANY_NAME = "École Pilote Burkina"
+
+# (category_name, amount in XOF)
+FEE_CATEGORIES = [
+	("Frais d'inscription", 15000),
+	("Frais de scolarité", 85000),
+]
+
+MODES_OF_PAYMENT = [
+	# (name, type)
+	("Espèces", "Cash"),
+	("Virement Bancaire", "Bank"),
+	("Orange Money", "General"),
+	("Moov Money", "General"),
+]
+
+MOBILE_MONEY_PROVIDER_NAME = "Orange Money Demo"
+
+# Student full name that receives a demo Scholarship (exercises the discount
+# hook in real demo data, not only in tests).
+SCHOLARSHIP_STUDENT = "Fatoumata Traoré"
 
 # (first, last, sex, grade, email, guardian(s) as (name, relationship, phone))
 STUDENTS = [
@@ -97,8 +125,23 @@ def run():
 	seed_term_1_attendance(groups_by_grade)
 	report_names = generate_and_rank_term_reports(groups_by_grade, term_1)
 
+	company = create_company()
+	create_modes_of_payment()
+	create_scholarship(academic_year)
+	schedules_by_grade = create_fee_structures_and_schedules(company, academic_year, groups_by_grade, grades_by_name)
+	invoice_names = seed_invoices(schedules_by_grade, groups_by_grade)
+	provider = create_mobile_money_provider()
+	payments = seed_payments(invoice_names, provider)
+
 	frappe.db.commit()
-	return {"school": school, "academic_year": academic_year, "student_term_reports": report_names}
+	return {
+		"school": school,
+		"academic_year": academic_year,
+		"student_term_reports": report_names,
+		"company": company,
+		"sales_invoices": invoice_names,
+		"payments": payments,
+	}
 
 
 def ensure_genders():
@@ -356,7 +399,11 @@ def create_student_groups(academic_year, term_1, grades_by_name):
 	"""
 	groups_by_grade = {}
 
-	demo_grade_names = {grade_name for *_, grade_name, _email, _guardians in STUDENTS}
+	# dict.fromkeys (not a set) so iteration order is deterministic across
+	# runs - a plain set's order depends on the process's hash seed, which
+	# would otherwise make seed_payments() (cash/mobile-money/outstanding
+	# assigned by invoice position) allocate differently on every re-run.
+	demo_grade_names = dict.fromkeys(grade_name for *_, grade_name, _email, _guardians in STUDENTS)
 	for grade_name in demo_grade_names:
 		grade = grades_by_name.get(grade_name)
 		if not grade:
@@ -524,3 +571,281 @@ def generate_and_rank_term_reports(groups_by_grade, term_1):
 		ranking.rank_term_reports(group_name, term_1)
 
 	return report_names
+
+
+# ---------------------------------------------------------------------------
+# Phase 3 - Finance
+# ---------------------------------------------------------------------------
+
+
+def create_company():
+	"""The demo school's own Company - normally created by the Setup Wizard,
+	which this headless dev environment skips (see docs/installation.md)."""
+	if not frappe.db.get_value("Currency", "XOF", "enabled"):
+		frappe.db.set_value("Currency", "XOF", "enabled", 1)
+
+	if not frappe.db.exists("Company", COMPANY_NAME):
+		frappe.get_doc(
+			{
+				"doctype": "Company",
+				"company_name": COMPANY_NAME,
+				"abbr": "EPB",
+				"default_currency": "XOF",
+				"country": "Burkina Faso",
+				"create_chart_of_accounts_based_on": "Standard Template",
+				"chart_of_accounts": "Standard",
+			}
+		).insert(ignore_permissions=True)
+
+	# Mirrors what the Setup Wizard's own install_fixtures.set_global_defaults
+	# does for the school's chosen company/currency - without this, Sales
+	# Invoice falls back to the system's INR default instead of XOF.
+	global_defaults = frappe.get_single("Global Defaults")
+	if global_defaults.default_company != COMPANY_NAME or global_defaults.default_currency != "XOF":
+		global_defaults.default_company = COMPANY_NAME
+		global_defaults.default_currency = "XOF"
+		global_defaults.country = "Burkina Faso"
+		global_defaults.save(ignore_permissions=True)
+
+	ensure_default_holiday_list()
+
+	return COMPANY_NAME
+
+
+def ensure_default_holiday_list():
+	"""Once ``École Pilote Burkina`` becomes the *global* default company
+	(above), Education's ``Student Attendance.validate_is_holiday()`` starts
+	resolving it for every attendance record system-wide and requires it to
+	have a ``default_holiday_list`` - normally set by the Setup Wizard.
+	Sunday is the standard school weekly off in Burkina Faso.
+	"""
+	list_name = f"{COMPANY_NAME} {ACADEMIC_YEAR}"
+	if not frappe.db.exists("Holiday List", list_name):
+		holiday_list = frappe.get_doc(
+			{
+				"doctype": "Holiday List",
+				"holiday_list_name": list_name,
+				"from_date": "2026-10-01",
+				"to_date": "2027-06-30",
+				"weekly_off": "Sunday",
+			}
+		)
+		holiday_list.get_weekly_off_dates()
+		holiday_list.insert(ignore_permissions=True)
+
+	if frappe.db.get_value("Company", COMPANY_NAME, "default_holiday_list") != list_name:
+		frappe.db.set_value("Company", COMPANY_NAME, "default_holiday_list", list_name)
+
+
+def create_modes_of_payment():
+	for name, mop_type in MODES_OF_PAYMENT:
+		if frappe.db.exists("Mode of Payment", name):
+			continue
+		frappe.get_doc(
+			{"doctype": "Mode of Payment", "mode_of_payment": name, "type": mop_type, "enabled": 1}
+		).insert(ignore_permissions=True)
+
+
+def create_scholarship(academic_year):
+	student = frappe.db.get_value("Student", {"student_name": SCHOLARSHIP_STUDENT}, "name")
+	if not student:
+		return None
+	if frappe.db.exists("Scholarship", {"student": student, "academic_year": academic_year}):
+		return frappe.db.get_value("Scholarship", {"student": student, "academic_year": academic_year}, "name")
+
+	scholarship = frappe.get_doc(
+		{
+			"doctype": "Scholarship",
+			"student": student,
+			"academic_year": academic_year,
+			"scholarship_type": "Bourse Partielle",
+			"discount_percent": 30,
+			"status": "Approuvée",
+			"reason": "Bourse au mérite - démonstration",
+		}
+	).insert(ignore_permissions=True)
+	return scholarship.name
+
+
+def create_fee_structures_and_schedules(company, academic_year, groups_by_grade, grades_by_name):
+	"""One Fee Structure + one Fee Schedule per demo grade (same components/
+	amounts for every grade - this is demo data, not a real fee policy),
+	targeting that grade's Student Group.
+	"""
+	for category_name, _amount in FEE_CATEGORIES:
+		if not frappe.db.exists("Fee Category", category_name):
+			frappe.get_doc({"doctype": "Fee Category", "category_name": category_name}).insert(
+				ignore_permissions=True
+			)
+
+	schedules_by_grade = {}
+
+	for grade_name, group_name in groups_by_grade.items():
+		grade = grades_by_name.get(grade_name)
+		program = frappe.db.get_value("Grade", grade, "program")
+		if not program:
+			continue
+
+		structure_name = frappe.db.get_value(
+			"Fee Structure", {"program": program, "academic_year": academic_year}, "name"
+		)
+		if not structure_name:
+			structure = frappe.get_doc(
+				{
+					"doctype": "Fee Structure",
+					"program": program,
+					"academic_year": academic_year,
+					"company": company,
+					"components": [
+						{"fees_category": cat, "amount": amount} for cat, amount in FEE_CATEGORIES
+					],
+				}
+			).insert(ignore_permissions=True)
+			structure.submit()
+			structure_name = structure.name
+
+		schedule_name = frappe.db.get_value("Fee Schedule", {"fee_structure": structure_name}, "name")
+		if not schedule_name:
+			structure = frappe.get_doc("Fee Structure", structure_name)
+			schedule = frappe.get_doc(
+				{
+					"doctype": "Fee Schedule",
+					"fee_structure": structure_name,
+					"academic_year": academic_year,
+					"company": company,
+					"due_date": "2026-11-30",
+					"components": [
+						{"fees_category": c.fees_category, "amount": c.amount, "total": c.total}
+						for c in structure.components
+					],
+					"student_groups": [{"student_group": group_name}],
+				}
+			).insert(ignore_permissions=True)
+			schedule.submit()
+			schedule_name = schedule.name
+
+		schedules_by_grade[grade_name] = schedule_name
+
+	return schedules_by_grade
+
+
+def seed_invoices(schedules_by_grade, groups_by_grade):
+	"""One Sales Invoice per demo student, built with Education's own
+	``create_sales_invoice`` (the exact function ``Fee Schedule.create_fees()``
+	uses in production) - so the scholarship/sibling discount hook
+	(``finance.discounts``) runs on real demo data, not only in tests.
+	"""
+	from education.education.doctype.fee_schedule.fee_schedule import create_sales_invoice
+
+	invoice_names = []
+	for grade_name, schedule_name in schedules_by_grade.items():
+		group_name = groups_by_grade[grade_name]
+		students = frappe.get_all(
+			"Student Group Student", filters={"parent": group_name, "active": 1}, fields=["student"]
+		)
+		for row in students:
+			existing = frappe.db.get_value(
+				"Sales Invoice", {"student": row.student, "fee_schedule": schedule_name}, "name"
+			)
+			if existing:
+				invoice_names.append(existing)
+				continue
+
+			name = create_sales_invoice(schedule_name, row.student)
+			invoice = frappe.get_doc("Sales Invoice", name)
+			if invoice.docstatus == 0:
+				invoice.submit()
+			invoice_names.append(name)
+
+	return invoice_names
+
+
+def create_mobile_money_provider():
+	if frappe.db.exists("Mobile Money Provider", MOBILE_MONEY_PROVIDER_NAME):
+		return MOBILE_MONEY_PROVIDER_NAME
+
+	frappe.get_doc(
+		{
+			"doctype": "Mobile Money Provider",
+			"provider_name": MOBILE_MONEY_PROVIDER_NAME,
+			"provider_code": "Orange Money",
+			"is_active": 1,
+			"sandbox_mode": 1,
+			"mode_of_payment": "Orange Money",
+			"currency": "XOF",
+			"webhook_secret": "demo-webhook-secret-do-not-use-in-production",
+		}
+	).insert(ignore_permissions=True)
+	return MOBILE_MONEY_PROVIDER_NAME
+
+
+def seed_payments(invoice_names, provider):
+	"""Demonstrate every payment channel the demo is meant to show off: the
+	first invoice paid in cash (Payment Entry), the second paid through a
+	simulated Mobile Money round-trip (initiate -> webhook -> Payment Entry,
+	the exact flow a real Orange Money/Moov Money integration would drive),
+	and any remaining invoice left outstanding on purpose so "outstanding
+	fees" reporting has something real to show.
+	"""
+	summary = {"cash": None, "mobile_money": None, "outstanding": []}
+	if not invoice_names:
+		return summary
+
+	cash_invoice = frappe.get_doc("Sales Invoice", invoice_names[0])
+	if cash_invoice.docstatus == 1 and cash_invoice.outstanding_amount:
+		summary["cash"] = _pay_in_cash(cash_invoice)
+	elif cash_invoice.docstatus == 1:
+		summary["cash"] = "already paid"
+
+	if len(invoice_names) > 1:
+		mm_invoice_name = invoice_names[1]
+		summary["mobile_money"] = _pay_by_mobile_money(mm_invoice_name, provider)
+
+	for name in invoice_names[2:]:
+		outstanding = frappe.db.get_value("Sales Invoice", name, "outstanding_amount")
+		if outstanding:
+			summary["outstanding"].append(name)
+
+	return summary
+
+
+def _pay_in_cash(invoice):
+	from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+
+	pe = get_payment_entry("Sales Invoice", invoice.name, party_amount=invoice.outstanding_amount)
+	pe.mode_of_payment = "Espèces"
+	pe.reference_no = f"CASH-{invoice.name}"
+	pe.reference_date = frappe.utils.nowdate()
+	pe.insert(ignore_permissions=True)
+	pe.submit()
+	return pe.name
+
+
+def _pay_by_mobile_money(invoice_name, provider):
+	from burkina_education.finance.mobile_money import api
+
+	existing = frappe.db.get_value(
+		"Mobile Money Transaction", {"reference_name": invoice_name, "status": "Success"}, "name"
+	)
+	if existing:
+		return existing
+
+	invoice = frappe.get_doc("Sales Invoice", invoice_name)
+	if invoice.docstatus != 1 or not invoice.outstanding_amount:
+		return None
+
+	result = api.initiate_payment(
+		reference_doctype="Sales Invoice",
+		reference_name=invoice_name,
+		provider=provider,
+		phone_number="+22670000099",
+	)
+	gateway_id = frappe.db.get_value(
+		"Mobile Money Transaction", result["transaction"], "gateway_transaction_id"
+	)
+	provider_doc = frappe.get_doc("Mobile Money Provider", provider)
+	secret = provider_doc.get_password("webhook_secret")
+	outcome = api.webhook(
+		provider=provider, gateway_transaction_id=gateway_id, status="SUCCESS", signature=secret
+	)
+	return outcome.get("transaction")
