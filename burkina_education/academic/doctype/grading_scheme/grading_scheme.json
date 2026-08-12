@@ -1,0 +1,179 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "field:scheme_name",
+ "creation": "2026-08-12 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "scheme_name",
+  "education_level",
+  "column_break_main",
+  "is_default",
+  "is_active",
+  "section_break_scale",
+  "score_max",
+  "passing_score",
+  "rounding_precision",
+  "column_break_scale",
+  "grading_scale",
+  "section_break_formula",
+  "use_coefficients",
+  "term_average_method",
+  "annual_average_method",
+  "section_break_desc",
+  "description"
+ ],
+ "fields": [
+  {
+   "fieldname": "scheme_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nom du barème",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "description": "Laisser vide pour appliquer ce barème à tous les niveaux d'enseignement.",
+   "fieldname": "education_level",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Niveau d'enseignement",
+   "options": "Education Level"
+  },
+  {
+   "fieldname": "column_break_main",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Utilisé automatiquement quand une Classe/un Élève n'a pas de barème explicitement assigné pour son niveau.",
+   "fieldname": "is_default",
+   "fieldtype": "Check",
+   "label": "Barème par défaut"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Actif"
+  },
+  {
+   "fieldname": "section_break_scale",
+   "fieldtype": "Section Break",
+   "label": "Échelle de notation"
+  },
+  {
+   "default": "20",
+   "fieldname": "score_max",
+   "fieldtype": "Float",
+   "label": "Note maximale",
+   "reqd": 1
+  },
+  {
+   "default": "10",
+   "fieldname": "passing_score",
+   "fieldtype": "Float",
+   "label": "Note de passage",
+   "reqd": 1
+  },
+  {
+   "default": "2",
+   "fieldname": "rounding_precision",
+   "fieldtype": "Int",
+   "label": "Décimales d'arrondi"
+  },
+  {
+   "fieldname": "column_break_scale",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Optionnel : pour convertir la moyenne en note-lettre (A, B, C, ...).",
+   "fieldname": "grading_scale",
+   "fieldtype": "Link",
+   "label": "Échelle de conversion (lettre)",
+   "options": "Grading Scale"
+  },
+  {
+   "fieldname": "section_break_formula",
+   "fieldtype": "Section Break",
+   "label": "Calcul des moyennes"
+  },
+  {
+   "default": "1",
+   "description": "Si décoché, chaque évaluation/matière compte à poids égal (moyenne simple).",
+   "fieldname": "use_coefficients",
+   "fieldtype": "Check",
+   "label": "Utiliser les coefficients"
+  },
+  {
+   "default": "Weighted by Coefficient",
+   "fieldname": "term_average_method",
+   "fieldtype": "Select",
+   "label": "Moyenne de matière → moyenne trimestrielle",
+   "options": "Weighted by Coefficient\nSimple Average"
+  },
+  {
+   "default": "Weighted by Term Weight",
+   "fieldname": "annual_average_method",
+   "fieldtype": "Select",
+   "label": "Moyennes trimestrielles → moyenne annuelle",
+   "options": "Weighted by Term Weight\nSimple Average"
+  },
+  {
+   "fieldname": "section_break_desc",
+   "fieldtype": "Section Break",
+   "label": "Description"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  }
+ ],
+ "icon": "fa fa-balance-scale",
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-08-12 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Academic",
+ "name": "Grading Scheme",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Academic Director",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Instructor"
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "scheme_name",
+ "track_changes": 1
+}

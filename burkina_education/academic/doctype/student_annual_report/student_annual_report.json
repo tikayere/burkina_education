@@ -1,0 +1,219 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "naming_series:",
+ "creation": "2026-08-12 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "student",
+  "student_name",
+  "grade",
+  "column_break_ids",
+  "academic_year",
+  "grading_scheme",
+  "section_break_terms",
+  "terms",
+  "section_break_summary",
+  "annual_average",
+  "column_break_rank",
+  "annual_rank",
+  "class_size",
+  "section_break_decision",
+  "decision",
+  "principal_comment",
+  "verification_code",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "default": "BE-SAR-.YYYY.-",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Série",
+   "options": "BE-SAR-.YYYY.-"
+  },
+  {
+   "fieldname": "student",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Élève",
+   "options": "Student",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "student.student_name",
+   "fieldname": "student_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nom",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "student.grade",
+   "fieldname": "grade",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Classe",
+   "options": "Grade",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_ids",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "academic_year",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Année académique",
+   "options": "Academic Year",
+   "reqd": 1
+  },
+  {
+   "fieldname": "grading_scheme",
+   "fieldtype": "Link",
+   "label": "Barème",
+   "options": "Grading Scheme"
+  },
+  {
+   "fieldname": "section_break_terms",
+   "fieldtype": "Section Break",
+   "label": "Trimestres"
+  },
+  {
+   "fieldname": "terms",
+   "fieldtype": "Table",
+   "label": "Moyennes trimestrielles",
+   "options": "Student Annual Report Term",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_summary",
+   "fieldtype": "Section Break",
+   "label": "Résumé"
+  },
+  {
+   "fieldname": "annual_average",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Moyenne annuelle",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_rank",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "annual_rank",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Rang annuel",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "class_size",
+   "fieldtype": "Int",
+   "label": "Effectif de la classe",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_decision",
+   "fieldtype": "Section Break",
+   "label": "Décision"
+  },
+  {
+   "default": "En attente",
+   "fieldname": "decision",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Décision de passage",
+   "options": "En attente\nAdmis\nRedouble"
+  },
+  {
+   "fieldname": "principal_comment",
+   "fieldtype": "Small Text",
+   "label": "Appréciation du directeur"
+  },
+  {
+   "fieldname": "verification_code",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Code de vérification",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amendé depuis",
+   "no_copy": 1,
+   "options": "Student Annual Report",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "icon": "fa fa-file-text-o",
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-08-12 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Academic",
+ "name": "Student Annual Report",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Academic Director",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Instructor"
+  },
+  {
+   "read": 1,
+   "role": "Student"
+  },
+  {
+   "read": 1,
+   "role": "Guardian"
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "student_name",
+ "track_changes": 1
+}

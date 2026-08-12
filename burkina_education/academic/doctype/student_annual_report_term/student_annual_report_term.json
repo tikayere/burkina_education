@@ -1,0 +1,60 @@
+{
+ "actions": [],
+ "creation": "2026-08-12 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "academic_term",
+  "student_term_report",
+  "column_break_main",
+  "term_average",
+  "weight"
+ ],
+ "fields": [
+  {
+   "fieldname": "academic_term",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Trimestre",
+   "options": "Academic Term",
+   "reqd": 1
+  },
+  {
+   "fieldname": "student_term_report",
+   "fieldtype": "Link",
+   "label": "Bulletin trimestriel",
+   "options": "Student Term Report",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_main",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "term_average",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Moyenne du trimestre"
+  },
+  {
+   "fetch_from": "academic_term.weight",
+   "fieldname": "weight",
+   "fieldtype": "Float",
+   "label": "Pondération",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-08-12 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Academic",
+ "name": "Student Annual Report Term",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
