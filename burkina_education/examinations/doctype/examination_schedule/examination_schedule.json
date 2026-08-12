@@ -1,0 +1,210 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "hash",
+ "creation": "2026-08-12 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "examination",
+  "grade",
+  "student_group",
+  "course",
+  "column_break_main",
+  "status",
+  "assessment_type",
+  "section_break_schedule",
+  "exam_date",
+  "from_time",
+  "to_time",
+  "column_break_schedule",
+  "room",
+  "invigilator",
+  "section_break_scoring",
+  "max_score",
+  "coefficient",
+  "column_break_scoring",
+  "assessment_plan"
+ ],
+ "fields": [
+  {
+   "fieldname": "examination",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Examen",
+   "options": "Examination",
+   "reqd": 1
+  },
+  {
+   "fieldname": "grade",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Classe",
+   "options": "Grade",
+   "reqd": 1
+  },
+  {
+   "description": "La Section/le groupe qui compose l'épreuve (une Classe peut avoir plusieurs sections). Utilisé pour créer le Plan d'évaluation (candidats).",
+   "fieldname": "student_group",
+   "fieldtype": "Link",
+   "label": "Groupe / Section",
+   "options": "Student Group",
+   "reqd": 1
+  },
+  {
+   "fieldname": "course",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Matière",
+   "options": "Course",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_main",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Statut",
+   "options": "Draft\nScheduled\nOngoing\nCompleted\nCancelled"
+  },
+  {
+   "fieldname": "assessment_type",
+   "fieldtype": "Link",
+   "label": "Type d'évaluation",
+   "options": "Assessment Type"
+  },
+  {
+   "fieldname": "section_break_schedule",
+   "fieldtype": "Section Break",
+   "label": "Créneau"
+  },
+  {
+   "fieldname": "exam_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "from_time",
+   "fieldtype": "Time",
+   "label": "De",
+   "reqd": 1
+  },
+  {
+   "fieldname": "to_time",
+   "fieldtype": "Time",
+   "label": "À",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_schedule",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "room",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Salle",
+   "options": "Room",
+   "reqd": 1
+  },
+  {
+   "fieldname": "invigilator",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Surveillant",
+   "options": "Instructor",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_scoring",
+   "fieldtype": "Section Break",
+   "label": "Notation"
+  },
+  {
+   "default": "20",
+   "fieldname": "max_score",
+   "fieldtype": "Float",
+   "label": "Note maximale",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "coefficient",
+   "fieldtype": "Float",
+   "label": "Coefficient"
+  },
+  {
+   "fieldname": "column_break_scoring",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Créé et géré automatiquement : les notes de cette épreuve passent par ce Plan d'évaluation Frappe Education.",
+   "fieldname": "assessment_plan",
+   "fieldtype": "Link",
+   "label": "Plan d'évaluation",
+   "options": "Assessment Plan",
+   "read_only": 1
+  }
+ ],
+ "icon": "fa fa-calendar-check-o",
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-08-12 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Examinations",
+ "name": "Examination Schedule",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Academic Director",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Examination Coordinator",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Instructor"
+  }
+ ],
+ "sort_field": "exam_date",
+ "sort_order": "ASC",
+ "states": [],
+ "track_changes": 1
+}
