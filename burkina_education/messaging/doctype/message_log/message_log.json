@@ -1,0 +1,249 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "naming_series:",
+ "creation": "2026-08-12 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "channel",
+  "status",
+  "column_break_main",
+  "event_key",
+  "template",
+  "provider",
+  "section_break_recipient",
+  "recipient_doctype",
+  "recipient",
+  "column_break_recipient",
+  "phone_number",
+  "email_address",
+  "section_break_content",
+  "subject",
+  "message",
+  "section_break_reference",
+  "reference_doctype",
+  "reference_name",
+  "column_break_reference",
+  "provider_message_id",
+  "retry_count",
+  "queued_on",
+  "sent_on",
+  "section_break_result",
+  "error",
+  "provider_response"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Série",
+   "options": "BE-MSG-.YYYY.-"
+  },
+  {
+   "fieldname": "channel",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Canal",
+   "options": "SMS\nWhatsApp\nEmail\nIn-App",
+   "reqd": 1
+  },
+  {
+   "default": "Queued",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Statut",
+   "options": "Queued\nSent\nDelivered\nFailed\nSkipped",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_main",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "event_key",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "Événement",
+   "read_only": 1
+  },
+  {
+   "fieldname": "template",
+   "fieldtype": "Link",
+   "label": "Modèle",
+   "options": "Notification Template",
+   "read_only": 1
+  },
+  {
+   "fieldname": "provider",
+   "fieldtype": "Link",
+   "label": "Fournisseur",
+   "options": "Messaging Provider",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_recipient",
+   "fieldtype": "Section Break",
+   "label": "Destinataire"
+  },
+  {
+   "fieldname": "recipient_doctype",
+   "fieldtype": "Select",
+   "label": "Type de destinataire",
+   "options": "Guardian\nStudent\nUser",
+   "read_only": 1
+  },
+  {
+   "fieldname": "recipient",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Destinataire",
+   "options": "recipient_doctype",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_recipient",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "phone_number",
+   "fieldtype": "Data",
+   "label": "Téléphone",
+   "read_only": 1
+  },
+  {
+   "fieldname": "email_address",
+   "fieldtype": "Data",
+   "label": "E-mail",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_content",
+   "fieldtype": "Section Break",
+   "label": "Contenu envoyé"
+  },
+  {
+   "depends_on": "eval:doc.channel==\"Email\"",
+   "fieldname": "subject",
+   "fieldtype": "Data",
+   "label": "Objet",
+   "read_only": 1
+  },
+  {
+   "fieldname": "message",
+   "fieldtype": "Small Text",
+   "label": "Message",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_reference",
+   "fieldtype": "Section Break",
+   "label": "Origine"
+  },
+  {
+   "fieldname": "reference_doctype",
+   "fieldtype": "Link",
+   "label": "Type de document lié",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Dynamic Link",
+   "label": "Document lié",
+   "options": "reference_doctype",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_reference",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Identifiant attribué par le fournisseur - utilisé pour corréler un accusé de livraison entrant à ce message.",
+   "fieldname": "provider_message_id",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "ID message fournisseur",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "retry_count",
+   "fieldtype": "Int",
+   "label": "Nombre de tentatives",
+   "read_only": 1
+  },
+  {
+   "fieldname": "queued_on",
+   "fieldtype": "Datetime",
+   "label": "Mis en file le",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sent_on",
+   "fieldtype": "Datetime",
+   "label": "Envoyé le",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_result",
+   "fieldtype": "Section Break",
+   "label": "Résultat"
+  },
+  {
+   "fieldname": "error",
+   "fieldtype": "Small Text",
+   "label": "Erreur",
+   "read_only": 1
+  },
+  {
+   "fieldname": "provider_response",
+   "fieldtype": "Code",
+   "label": "Réponse brute (audit)",
+   "options": "JSON",
+   "read_only": 1
+  }
+ ],
+ "icon": "fa fa-paper-plane",
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-08-12 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Messaging",
+ "name": "Message Log",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "School Director"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Secretary"
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 0
+}

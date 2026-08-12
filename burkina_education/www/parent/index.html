@@ -1,0 +1,69 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+<div class="be-portal">
+	<h1>{{ _("Espace Parent") }}</h1>
+	<div id="be-loading" class="be-loading">{{ _("Chargement...") }}</div>
+	<div id="be-content" style="display:none;">
+		<div class="be-cards" id="be-children"></div>
+
+		<h2 class="be-section-title">{{ _("Annonces") }}</h2>
+		<div id="be-announcements"></div>
+	</div>
+</div>
+
+<script>
+frappe.ready(function() {
+	frappe.call({
+		method: "burkina_education.messaging.portal.guardian_dashboard",
+		callback: function(r) {
+			document.getElementById("be-loading").style.display = "none";
+			document.getElementById("be-content").style.display = "block";
+			var data = r.message || {};
+			renderChildren(data.children || []);
+			renderAnnouncements(data.announcements || []);
+		},
+	});
+
+	function renderChildren(children) {
+		var el = document.getElementById("be-children");
+		if (!children.length) {
+			el.innerHTML = '<div class="be-empty">{{ _("Aucun élève associé à ce compte.") }}</div>';
+			return;
+		}
+		el.innerHTML = children.map(function(c) {
+			var badgeClass = (c.outstanding_balance > 0) ? "warn" : "ok";
+			var badgeText = (c.outstanding_balance > 0)
+				? "{{ _('Solde dû') }}"
+				: "{{ _('À jour') }}";
+			return (
+				'<div class="be-card be-clickable" onclick="window.location.href=\'/parent/student?name=' + encodeURIComponent(c.name) + '\'">' +
+				'<h3>' + frappe.utils.escape_html(c.student_name || "") + '</h3>' +
+				'<div class="be-muted">' + frappe.utils.escape_html(c.grade_name || "") + '</div>' +
+				'<div class="be-row"><span>{{ _("Assiduité (30j)") }}</span><b>' + (c.attendance_percentage != null ? c.attendance_percentage + "%" : "-") + '</b></div>' +
+				'<span class="be-badge ' + badgeClass + '">' + badgeText + '</span>' +
+				'</div>'
+			);
+		}).join("");
+	}
+
+	function renderAnnouncements(items) {
+		var el = document.getElementById("be-announcements");
+		if (!items.length) {
+			el.innerHTML = '<div class="be-empty">{{ _("Aucune annonce pour le moment.") }}</div>';
+			return;
+		}
+		el.innerHTML = items.map(function(a) {
+			var cls = "priority-" + (a.priority || "normal").toLowerCase().replace(/[^a-z]/g, "");
+			return (
+				'<div class="be-announce ' + cls + '">' +
+				'<b>' + frappe.utils.escape_html(a.title || "") + '</b>' +
+				'<div class="be-muted">' + frappe.datetime.str_to_user(a.published_on) + '</div>' +
+				'<div>' + (a.content || "") + '</div>' +
+				'</div>'
+			);
+		}).join("");
+	}
+});
+</script>
+{% endblock %}

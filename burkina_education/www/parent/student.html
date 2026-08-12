@@ -1,0 +1,112 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+<div class="be-portal">
+	<a class="be-back-link" href="/parent">&larr; {{ _("Retour") }}</a>
+	<h1 id="be-title">{{ _("Élève") }}</h1>
+	<div id="be-loading" class="be-loading">{{ _("Chargement...") }}</div>
+	<div id="be-content" style="display:none;">
+		<div class="be-summary-bar" id="be-summary"></div>
+
+		<h2 class="be-section-title">{{ _("Bulletins") }}</h2>
+		<table class="be-table" id="be-term-reports"></table>
+
+		<h2 class="be-section-title">{{ _("Frais scolaires") }}</h2>
+		<table class="be-table" id="be-invoices"></table>
+
+		<h2 class="be-section-title">{{ _("Annonces") }}</h2>
+		<div id="be-announcements"></div>
+	</div>
+</div>
+
+<script>
+frappe.ready(function() {
+	var student = {{ frappe.utils.escape_html(student) | tojson }};
+
+	frappe.call({
+		method: "burkina_education.messaging.portal.guardian_student_detail",
+		args: { student: student },
+		callback: function(r) {
+			document.getElementById("be-loading").style.display = "none";
+			document.getElementById("be-content").style.display = "block";
+			render(r.message || {});
+		},
+	});
+
+	function render(data) {
+		var s = data.student || {};
+		document.getElementById("be-title").textContent = s.student_name || "";
+
+		var a = data.attendance || {};
+		document.getElementById("be-summary").innerHTML = [
+			stat("{{ _('Assiduité (30j)') }}", (a.percentage != null ? a.percentage + "%" : "-")),
+			stat("{{ _('Solde dû') }}", frappe.format(data.outstanding_balance || 0, { fieldtype: "Currency" })),
+			stat("{{ _('Classe') }}", s.grade_name || "-"),
+		].join("");
+
+		renderTermReports(data.term_reports || []);
+		renderInvoices(data.invoices || []);
+		renderAnnouncements(data.announcements || []);
+	}
+
+	function stat(label, value) {
+		return '<div class="be-summary-stat"><div class="value">' + value + '</div><div class="label">' + label + '</div></div>';
+	}
+
+	function renderTermReports(rows) {
+		var el = document.getElementById("be-term-reports");
+		if (!rows.length) {
+			el.outerHTML = '<div class="be-empty" id="be-term-reports">{{ _("Aucun bulletin publié pour le moment.") }}</div>';
+			return;
+		}
+		el.innerHTML = (
+			'<tr><th>{{ _("Trimestre") }}</th><th>{{ _("Moyenne") }}</th><th>{{ _("Rang") }}</th><th></th></tr>' +
+			rows.map(function(r) {
+				return (
+					'<tr><td>' + (r.academic_term || "") + '</td>' +
+					'<td>' + (r.term_average != null ? r.term_average : "-") + '</td>' +
+					'<td>' + (r.class_rank ? (r.class_rank + "/" + r.class_size) : "-") + '</td>' +
+					'<td><a href="/printview?doctype=Student%20Term%20Report&name=' + encodeURIComponent(r.name) + '&format=Bulletin%20Burkina" target="_blank">{{ _("Voir") }}</a></td></tr>'
+				);
+			}).join("")
+		);
+	}
+
+	function renderInvoices(rows) {
+		var el = document.getElementById("be-invoices");
+		if (!rows.length) {
+			el.outerHTML = '<div class="be-empty" id="be-invoices">{{ _("Aucune facture pour le moment.") }}</div>';
+			return;
+		}
+		el.innerHTML = (
+			'<tr><th>{{ _("Facture") }}</th><th>{{ _("Total") }}</th><th>{{ _("Solde") }}</th><th>{{ _("Échéance") }}</th></tr>' +
+			rows.map(function(r) {
+				return (
+					'<tr><td>' + r.name + '</td>' +
+					'<td>' + frappe.format(r.grand_total, { fieldtype: "Currency", options: r.currency }) + '</td>' +
+					'<td>' + frappe.format(r.outstanding_amount, { fieldtype: "Currency", options: r.currency }) + '</td>' +
+					'<td>' + (r.due_date ? frappe.datetime.str_to_user(r.due_date) : "-") + '</td></tr>'
+				);
+			}).join("")
+		);
+	}
+
+	function renderAnnouncements(items) {
+		var el = document.getElementById("be-announcements");
+		if (!items.length) {
+			el.innerHTML = '<div class="be-empty">{{ _("Aucune annonce pour le moment.") }}</div>';
+			return;
+		}
+		el.innerHTML = items.map(function(a) {
+			var cls = "priority-" + (a.priority || "normal").toLowerCase().replace(/[^a-z]/g, "");
+			return (
+				'<div class="be-announce ' + cls + '">' +
+				'<b>' + frappe.utils.escape_html(a.title || "") + '</b>' +
+				'<div>' + (a.content || "") + '</div>' +
+				'</div>'
+			);
+		}).join("");
+	}
+});
+</script>
+{% endblock %}

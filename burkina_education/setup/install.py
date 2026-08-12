@@ -58,6 +58,7 @@ def after_install():
 	create_property_setters()
 	create_client_scripts()
 	create_finance_permissions()
+	create_portal_permissions()
 	enable_xof_currency()
 	ensure_item_group_root()
 	ensure_stock_uom_default()
@@ -137,6 +138,18 @@ CLIENT_SCRIPTS = [
 		"view": "Form",
 		"script_path": ("finance", "client_scripts", "sales_invoice_mobile_money.js"),
 	},
+	{
+		"name": "Burkina Education: Guardian Portal Invite Button",
+		"dt": "Guardian",
+		"view": "Form",
+		"script_path": ("messaging", "client_scripts", "guardian_portal_invite.js"),
+	},
+	{
+		"name": "Burkina Education: Student Portal Invite Button",
+		"dt": "Student",
+		"view": "Form",
+		"script_path": ("messaging", "client_scripts", "student_portal_invite.js"),
+	},
 ]
 
 
@@ -186,6 +199,23 @@ def create_finance_permissions():
 		add_permission(doctype, "Accountant", 0)
 		for ptype in ("read", "write", "create", "print", "email", "report", "export"):
 			update_permission_property(doctype, "Accountant", 0, ptype, 1)
+
+
+#: Doctypes the Guardian/Student Portals need plain **read** access to
+#: (``/printview``, the portal's own whitelisted API calls). This alone
+#: would let any Guardian/Student read *any* record - narrowed down to only
+#: their own children/own record by the ``has_permission`` hook in hooks.py
+#: (messaging/permissions.py), which can only ever deny, never grant.
+PORTAL_READ_ONLY_DOCTYPES = ["Student Term Report", "Student Annual Report", "Student Attendance", "Sales Invoice"]
+
+
+def create_portal_permissions():
+	from frappe.permissions import add_permission, update_permission_property
+
+	for doctype in PORTAL_READ_ONLY_DOCTYPES:
+		for role in ("Guardian", "Student"):
+			add_permission(doctype, role, 0)
+			update_permission_property(doctype, role, 0, "read", 1)
 
 
 def enable_xof_currency():
@@ -386,11 +416,21 @@ def get_custom_fields():
 				"insert_after": "preferred_channel",
 			},
 			{
+				# Phase 4 (Communication, docs/architecture.md section J) - WhatsApp
+				# gets its own opt-in, independent of sms_consent (master.md §34:
+				# "opt-in/opt-out" per channel, a guardian may want one but not
+				# the other).
+				"fieldname": "whatsapp_consent",
+				"label": "Consentement WhatsApp",
+				"fieldtype": "Check",
+				"insert_after": "sms_consent",
+			},
+			{
 				"fieldname": "portal_access",
 				"label": "Accès au portail parent",
 				"fieldtype": "Check",
 				"default": "1",
-				"insert_after": "sms_consent",
+				"insert_after": "whatsapp_consent",
 			},
 			{
 				"fieldname": "payment_responsibility",

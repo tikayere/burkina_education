@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Burkina Education">
+  <!-- App icon: Burkina Faso flag colours (red/green, yellow star) behind a
+       simple graduation-cap + open-book glyph - shown on the Frappe /apps
+       screen and app switcher (hooks.py: app_logo_url / add_to_apps_screen). -->
+  <defs>
+    <clipPath id="be-round">
+      <rect x="0" y="0" width="64" height="64" rx="14" ry="14"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#be-round)">
+    <rect x="0" y="0" width="64" height="32" fill="#EF2B2D"/>
+    <rect x="0" y="32" width="64" height="32" fill="#009E49"/>
+  </g>
+  <polygon points="32,22 37.06,29.53 45.9,32 37.06,34.47 32,42 26.94,34.47 18.1,32 26.94,29.53"
+           fill="#FCD116"/>
+  <g fill="#ffffff">
+    <path d="M14 20 L32 13 L50 20 L32 27 Z" opacity="0.96"/>
+    <path d="M20 23.4 V31 c0 3 5.4 5.4 12 5.4 s12 -2.4 12 -5.4 v-7.6 l-12 4.6 Z" opacity="0.9"/>
+    <circle cx="47" cy="23.4" r="1.6"/>
+    <rect x="46.3" y="23.4" width="1.4" height="10" rx="0.7"/>
+  </g>
+</svg>

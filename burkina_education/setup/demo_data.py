@@ -13,14 +13,20 @@ grade, a first-term Assessment Plan/Result per student, Student Attendance,
 and a computed+ranked+submitted Student Term Report per student - so the
 whole Phase 2 chain (marks -> lock -> compute -> rank -> bulletin) has real,
 inspectable demo data instead of only being covered by unit tests.
-Phase 3 (this file, added alongside the finance module): a Company (XOF),
-Fee Category/Structure/Schedule per demo grade, a Scholarship, one Sales
-Invoice per demo student (Education's own ``create_sales_invoice`` -
-exercising the scholarship/sibling discount hook for real), one paid in cash
-(Payment Entry), one paid via a simulated Mobile Money round-trip
-(initiate -> webhook -> Payment Entry), one left outstanding so "outstanding
-fees" reporting has something to show. Phase 4+ modules are seeded once
-those are built.
+Phase 3: a Company (XOF), Fee Category/Structure/Schedule per demo grade, a
+Scholarship, one Sales Invoice per demo student (Education's own
+``create_sales_invoice`` - exercising the scholarship/sibling discount hook
+for real), one paid in cash (Payment Entry), one paid via a simulated Mobile
+Money round-trip (initiate -> webhook -> Payment Entry), one left
+outstanding so "outstanding fees" reporting has something to show.
+Phase 4 (Communication): a sandbox SMS/WhatsApp Messaging Provider each,
+French Notification Templates for every event_key, one Guardian and one
+Student promoted to real portal Users (communication.portal.invite_*), and
+a published "École Pilote Burkina" Announcement - so the notification
+fan-out triggered automatically by the Phase 3 payments/Phase 2 term
+reports above (Payment Entry.on_submit / Student Term Report.on_submit,
+hooks.py) has real templates/providers to actually send through, not just
+silently skip for lack of configuration.
 """
 
 import frappe
@@ -118,6 +124,13 @@ def run():
 	create_subjects()
 	create_students(school, grades_by_name)
 
+	# Phase 4 setup runs before anything that can trigger a notification
+	# (Student Term Report/Payment Entry submission below) so those hooks
+	# have a real template + provider to send through instead of silently
+	# skipping for lack of configuration.
+	create_messaging_providers()
+	create_notification_templates()
+
 	create_grading_scheme()
 	create_assessment_types()
 	groups_by_grade = create_student_groups(academic_year, term_1, grades_by_name)
@@ -133,6 +146,9 @@ def run():
 	provider = create_mobile_money_provider()
 	payments = seed_payments(invoice_names, provider)
 
+	portal_users = create_portal_users()
+	announcement = create_demo_announcement()
+
 	frappe.db.commit()
 	return {
 		"school": school,
@@ -141,6 +157,8 @@ def run():
 		"company": company,
 		"sales_invoices": invoice_names,
 		"payments": payments,
+		"portal_users": portal_users,
+		"announcement": announcement,
 	}
 
 
@@ -849,3 +867,164 @@ def _pay_by_mobile_money(invoice_name, provider):
 		provider=provider, gateway_transaction_id=gateway_id, status="SUCCESS", signature=secret
 	)
 	return outcome.get("transaction")
+
+
+# ---------------------------------------------------------------------------
+# Phase 4 - Communication
+# ---------------------------------------------------------------------------
+
+MESSAGING_PROVIDERS = [
+	# (provider_name, channel, sender_id)
+	("SMS Bac à Sable", "SMS", "EPB"),
+	("WhatsApp Bac à Sable", "WhatsApp", "+22670000000"),
+]
+
+# (template_name, event_key, channel, body). All sandbox/demo copy - a real
+# school edits these (Notification Template list) to its own wording,
+# nothing here is read by any code path other than communication.notify.
+NOTIFICATION_TEMPLATES = [
+	(
+		"Absence - SMS",
+		"Absence Notification",
+		"SMS",
+		"Bonjour {{ guardian_name }}, {{ student_name }} a un taux de présence de "
+		"{{ attendance_percentage }}% (seuil {{ threshold }}%) entre le {{ from_date }} "
+		"et le {{ to_date }}. École Pilote Burkina.",
+	),
+	(
+		"Paiement confirmé - SMS",
+		"Payment Confirmation",
+		"SMS",
+		"Bonjour {{ guardian_name }}, nous confirmons la réception de {{ amount }} pour "
+		"{{ student_name }} (réf {{ reference }}). Solde restant : {{ balance }}. Merci.",
+	),
+	(
+		"Rappel de frais - SMS",
+		"Fee Reminder",
+		"SMS",
+		"Bonjour {{ guardian_name }}, la facture {{ invoice }} de {{ student_name }} "
+		"({{ amount }}) est en retard depuis le {{ due_date }}. Merci de régulariser.",
+	),
+	(
+		"Résultat disponible - SMS",
+		"Result Available",
+		"SMS",
+		"Bonjour {{ guardian_name }}, le bulletin de {{ student_name }} pour "
+		"{{ academic_term }} est disponible (moyenne : {{ term_average }}). "
+		"Consultez l'espace parent.",
+	),
+	(
+		"Réunion parents - SMS",
+		"Parent Meeting",
+		"SMS",
+		"Bonjour {{ guardian_name }}, une réunion concernant {{ student_name }} est "
+		"prévue le {{ date }} à {{ location }}.",
+	),
+	(
+		"Changement d'emploi du temps - SMS",
+		"Timetable Change",
+		"SMS",
+		"Bonjour {{ guardian_name }}, changement d'emploi du temps pour "
+		"{{ student_name }} : {{ description }}.",
+	),
+	(
+		"Annonce - SMS",
+		"School Announcement",
+		"SMS",
+		"École Pilote Burkina : {{ title }}",
+	),
+	(
+		"Message urgent - SMS",
+		"Emergency Message",
+		"SMS",
+		"URGENT - École Pilote Burkina : {{ title }} - {{ content }}",
+	),
+]
+
+PORTAL_GUARDIAN = "Issa Ouédraogo"
+PORTAL_STUDENT = "Amadou Ouédraogo"
+
+ANNOUNCEMENT_TITLE = "Réunion de rentrée - Trimestre 1"
+
+
+def create_messaging_providers():
+	for provider_name, channel, sender_id in MESSAGING_PROVIDERS:
+		if frappe.db.exists("Messaging Provider", provider_name):
+			continue
+		frappe.get_doc(
+			{
+				"doctype": "Messaging Provider",
+				"provider_name": provider_name,
+				"channel": channel,
+				"provider_code": "Generic HTTP",
+				"is_active": 1,
+				"sandbox_mode": 1,
+				"is_default": 1,
+				"sender_id": sender_id,
+			}
+		).insert(ignore_permissions=True)
+
+
+def create_notification_templates():
+	for template_name, event_key, channel, body in NOTIFICATION_TEMPLATES:
+		if frappe.db.exists("Notification Template", template_name):
+			continue
+		frappe.get_doc(
+			{
+				"doctype": "Notification Template",
+				"template_name": template_name,
+				"event_key": event_key,
+				"channel": channel,
+				"language": "fr",
+				"is_active": 1,
+				"body": body,
+			}
+		).insert(ignore_permissions=True)
+
+
+def create_portal_users():
+	"""Promote one demo Guardian and one demo Student to real portal Users
+	(communication.portal.invite_*) so the Guardian/Student Portals have
+	something real to log into - without this, every Guardian/Student
+	created above is Desk-invisible data only (Education Settings.
+	user_creation_skip is on for the whole demo seed, see create_students())."""
+	from burkina_education.messaging.portal import invite_guardian, invite_student
+
+	result = {}
+
+	guardian_name = frappe.db.get_value("Guardian", {"guardian_name": PORTAL_GUARDIAN}, "name")
+	if guardian_name:
+		guardian = frappe.get_doc("Guardian", guardian_name)
+		if not guardian.email_address:
+			guardian.db_set("email_address", "issa.ouedraogo@epb-demo.bf")
+		result["guardian_user"] = invite_guardian(guardian_name)
+
+	student_name = frappe.db.get_value("Student", {"student_name": PORTAL_STUDENT}, "name")
+	if student_name:
+		result["student_user"] = invite_student(student_name)
+
+	return result
+
+
+def create_demo_announcement():
+	if frappe.db.exists("Announcement", {"title": ANNOUNCEMENT_TITLE}):
+		return frappe.db.get_value("Announcement", {"title": ANNOUNCEMENT_TITLE}, "name")
+
+	doc = frappe.get_doc(
+		{
+			"doctype": "Announcement",
+			"title": ANNOUNCEMENT_TITLE,
+			"content": (
+				"<p>Chers parents,</p><p>La réunion de rentrée du Trimestre 1 se tiendra "
+				"la semaine prochaine. Merci de consulter l'espace parent pour les détails "
+				"de votre classe.</p>"
+			),
+			"priority": "Normal",
+			"audience_type": "All Guardians",
+			"start_date": frappe.utils.nowdate(),
+			"notify_in_app": 1,
+			"notify_sms": 1,
+		}
+	).insert(ignore_permissions=True)
+	doc.publish()
+	return doc.name

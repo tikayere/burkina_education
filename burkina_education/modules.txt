@@ -6,4 +6,5 @@ Finance
 Student
 Guardian
 Admissions
+Messaging
 Settings

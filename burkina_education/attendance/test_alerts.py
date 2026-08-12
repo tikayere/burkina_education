@@ -7,6 +7,7 @@ from frappe.utils import add_days, nowdate
 
 from burkina_education.academic.tests.fixtures import AcademicFixture
 from burkina_education.attendance.alerts import run_attendance_alerts
+from burkina_education.messaging.tests.fixtures import CommunicationFixture
 
 
 class TestAttendanceAlerts(FrappeTestCase):
@@ -77,3 +78,36 @@ class TestAttendanceAlerts(FrappeTestCase):
 			),
 			"Late",
 		)
+
+
+class TestAttendanceAlertNotification(FrappeTestCase):
+	"""notify_guardians() (Phase 4) - a deliberately separate, explicit step
+	from detection (see attendance/alerts.py's module docstring)."""
+
+	def setUp(self):
+		self.fx = CommunicationFixture()
+		self.alert = frappe.get_doc(
+			{
+				"doctype": "Attendance Alert",
+				"student": self.fx.students[0].name,
+				"from_date": add_days(nowdate(), -5),
+				"to_date": nowdate(),
+				"total_days": 5,
+				"present_count": 1,
+				"absent_count": 4,
+				"attendance_percentage": 20,
+				"threshold": 80,
+			}
+		).insert(ignore_permissions=True)
+
+	def test_notify_guardians_sends_and_updates_status(self):
+		result = self.alert.notify_guardians()
+
+		self.assertEqual(result["sent"], 1)
+		self.alert.reload()
+		self.assertEqual(self.alert.status, "Notified")
+
+		log = frappe.get_last_doc(
+			"Message Log", filters={"event_key": "Absence Notification", "reference_name": self.alert.name}
+		)
+		self.assertEqual(log.recipient, self.fx.guardian.name)

@@ -5,21 +5,30 @@ app_description = "Burkina Faso School ERP — local layer on top of Frappe Educ
 app_email = "pourou.2000@gmail.com"
 app_license = "gpl-3.0"
 
+# Desk app icon (Frappe /apps screen, app switcher) - see public/images/logo.svg
+# (Burkina Faso flag colours behind a graduation-cap/book glyph).
+app_icon = "octicon octicon-mortar-board"
+app_color = "#EF2B2D"
+app_logo_url = "/assets/burkina_education/images/logo.svg"
+# No single module workspace represents the whole app - land on the
+# Desk's own workspace switcher rather than guessing at one.
+app_home = "/app"
+
 # Apps
 # ------------------
 
 required_apps = ["erpnext", "education"]
 
 # Each item in the list will be shown as an app in the apps page
-# add_to_apps_screen = [
-# 	{
-# 		"name": "burkina_education",
-# 		"logo": "/assets/burkina_education/logo.png",
-# 		"title": "Burkina Education",
-# 		"route": "/burkina_education",
-# 		"has_permission": "burkina_education.api.permission.has_app_permission"
-# 	}
-# ]
+add_to_apps_screen = [
+	{
+		"name": app_name,
+		"logo": app_logo_url,
+		"title": app_title,
+		"route": app_home,
+		"has_permission": "burkina_education.api.permission.has_app_permission",
+	}
+]
 
 # Includes in <head>
 # ------------------
@@ -29,7 +38,7 @@ required_apps = ["erpnext", "education"]
 # app_include_js = "/assets/burkina_education/js/burkina_education.js"
 
 # include js, css files in header of web template
-# web_include_css = "/assets/burkina_education/css/burkina_education.css"
+web_include_css = "/assets/burkina_education/css/portal.css"
 # web_include_js = "/assets/burkina_education/js/burkina_education.js"
 
 # include custom scss in every website theme (without file extension ".scss")
@@ -59,10 +68,13 @@ required_apps = ["erpnext", "education"]
 # application home page (will override Website Settings)
 # home_page = "login"
 
-# website user home page (by Role)
-# role_home_page = {
-# 	"Role": "home_page"
-# }
+# website user home page (by Role) - Guardian/Student Portals (master.md
+# §29/§30) so a portal login lands directly on the useful page instead of
+# the generic Frappe website home.
+role_home_page = {
+	"Guardian": "parent",
+	"Student": "student",
+}
 
 # Generators
 # ----------
@@ -119,10 +131,15 @@ after_install = "burkina_education.setup.install.after_install"
 # permission_query_conditions = {
 # 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
 # }
-#
-# has_permission = {
-# 	"Event": "frappe.desk.doctype.event.event.has_permission",
-# }
+
+has_permission = {
+	# Guardian/Student Portals (master.md §29/§30/§54/§77) - narrows the
+	# Custom DocPerm read grant (install.py::create_portal_permissions) down
+	# to "only this guardian's own children / this student's own record".
+	# See messaging/permissions.py.
+	doctype: "burkina_education.messaging.permissions.student_scoped_has_permission"
+	for doctype in ("Student Term Report", "Student Annual Report", "Student Attendance", "Sales Invoice")
+}
 
 # DocType Class
 # ---------------
@@ -156,6 +173,20 @@ doc_events = {
 		# section H).
 		"validate": "burkina_education.finance.discounts.apply_scholarship_and_sibling_discount",
 	},
+	"Payment Entry": {
+		# Covers both a normal cash/bank payment and a mobile money
+		# confirmation (finance/mobile_money/api.py submits a real Payment
+		# Entry too) - master.md §32 "Payment confirmation" (docs/architecture.md
+		# section J).
+		"on_submit": "burkina_education.finance.notifications.notify_payment_confirmation",
+	},
+	"Student Term Report": {
+		# master.md §32 "Result available" (docs/architecture.md section J).
+		"on_submit": "burkina_education.academic.notifications.notify_term_report_available",
+	},
+	"Student Annual Report": {
+		"on_submit": "burkina_education.academic.notifications.notify_annual_report_available",
+	},
 }
 
 # Scheduled Tasks
@@ -164,8 +195,13 @@ doc_events = {
 scheduler_events = {
 	"daily": [
 		# master.md §24: detect attendance below the configured threshold every
-		# day. Notifying the guardian/administration is Phase 4 (Communication).
+		# day. Notifying the guardian/administration is a separate, explicit
+		# step (Attendance Alert.notify_guardians(), Phase 4/Communication) -
+		# see attendance/alerts.py.
 		"burkina_education.attendance.alerts.run_attendance_alerts",
+		# master.md §32 "Fee reminder": one reminder per overdue school-fee
+		# invoice at most every N days (docs/architecture.md section J).
+		"burkina_education.finance.notifications.run_fee_reminders",
 	],
 }
 

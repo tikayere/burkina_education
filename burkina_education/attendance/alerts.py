@@ -2,9 +2,10 @@
 # For license information, please see license.txt
 
 """Attendance threshold detection (master.md §24: "attendance < configured
-threshold -> optionally notify"). This module only detects and logs; sending
-an actual SMS/WhatsApp/portal notification is Phase 4 (Communication) -
-see docs/architecture.md section G.
+threshold -> optionally notify"). This module only detects and logs;
+actually sending an SMS/WhatsApp/portal notification is a deliberate,
+separate step - see AttendanceAlert.notify_guardians() and
+docs/architecture.md sections G/J.
 """
 
 import frappe

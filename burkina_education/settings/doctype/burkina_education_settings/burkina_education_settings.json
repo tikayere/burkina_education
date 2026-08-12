@@ -21,7 +21,9 @@
   "admission_naming_format",
   "payment_naming_format",
   "section_break_finance",
-  "sibling_discount_rules"
+  "sibling_discount_rules",
+  "section_break_communication",
+  "fee_reminder_interval_days"
  ],
  "fields": [
   {
@@ -127,6 +129,18 @@
    "fieldtype": "Table",
    "label": "Règles de réduction fratrie",
    "options": "Sibling Discount Rule"
+  },
+  {
+   "fieldname": "section_break_communication",
+   "fieldtype": "Section Break",
+   "label": "Communication"
+  },
+  {
+   "default": "7",
+   "description": "Nombre minimum de jours entre deux rappels de paiement pour une même facture en retard (voir finance.notifications.run_fee_reminders).",
+   "fieldname": "fee_reminder_interval_days",
+   "fieldtype": "Int",
+   "label": "Intervalle entre rappels de frais (jours)"
   }
  ],
  "icon": "fa fa-cog",

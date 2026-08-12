@@ -1,0 +1,143 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "field:template_name",
+ "creation": "2026-08-12 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "template_name",
+  "event_key",
+  "channel",
+  "column_break_main",
+  "language",
+  "is_active",
+  "section_break_content",
+  "subject",
+  "body",
+  "available_placeholders"
+ ],
+ "fields": [
+  {
+   "fieldname": "template_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nom du modèle",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "description": "Événement métier qui déclenche ce modèle (voir communication/notify.py). \"Autre\" pour un modèle déclenché manuellement (ex: depuis une Annonce).",
+   "fieldname": "event_key",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Événement",
+   "options": "Absence Notification\nPayment Confirmation\nFee Reminder\nResult Available\nSchool Announcement\nEmergency Message\nParent Meeting\nTimetable Change\nOther",
+   "reqd": 1
+  },
+  {
+   "description": "Un même événement peut avoir un modèle distinct par canal (le contenu SMS est court, l'e-mail peut être plus détaillé).",
+   "fieldname": "channel",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Canal",
+   "options": "SMS\nWhatsApp\nEmail\nIn-App",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_main",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "fr",
+   "fieldname": "language",
+   "fieldtype": "Link",
+   "label": "Langue",
+   "options": "Language"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "in_standard_filter": 1,
+   "label": "Actif"
+  },
+  {
+   "fieldname": "section_break_content",
+   "fieldtype": "Section Break",
+   "label": "Contenu"
+  },
+  {
+   "depends_on": "eval:doc.channel==\"Email\"",
+   "fieldname": "subject",
+   "fieldtype": "Data",
+   "label": "Objet (e-mail uniquement)"
+  },
+  {
+   "description": "Modèle Jinja - variables disponibles listées ci-dessous selon l'événement (ex: {{ student_name }}, {{ amount }}).",
+   "fieldname": "body",
+   "fieldtype": "Code",
+   "label": "Message",
+   "options": "Jinja",
+   "reqd": 1
+  },
+  {
+   "fieldname": "available_placeholders",
+   "fieldtype": "Small Text",
+   "label": "Variables disponibles",
+   "read_only": 1
+  }
+ ],
+ "icon": "fa fa-envelope-o",
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-08-12 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Messaging",
+ "name": "Notification Template",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "School Director",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Secretary",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

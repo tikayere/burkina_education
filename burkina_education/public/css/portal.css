@@ -1,0 +1,45 @@
+/* Copyright (c) 2026, Burkina Education Project and contributors
+ * For license information, please see license.txt
+ *
+ * Shared styling for the Guardian/Student Portals (www/parent/*,
+ * www/student/*) - master.md §60/§67: simple, clean, mobile-first, minimal
+ * clicks. Loaded site-wide via hooks.py::web_include_css so it's available
+ * to every www page without per-page duplication.
+ */
+
+.be-portal { max-width: 900px; margin: 0 auto; }
+.be-portal h1 { font-size: 1.6rem; margin-bottom: 1.2rem; }
+.be-portal h2.be-section-title { margin-top: 2rem; margin-bottom: .6rem; font-size: 1.1rem; }
+
+.be-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+.be-card { border: 1px solid var(--border-color, #e0e0e0); border-radius: 10px; padding: 1rem 1.2rem; background: var(--card-bg, #fff); }
+.be-card.be-clickable { cursor: pointer; transition: box-shadow .15s; }
+.be-card.be-clickable:hover { box-shadow: 0 2px 10px rgba(0,0,0,.08); }
+.be-card h3 { margin: 0 0 .4rem 0; font-size: 1.1rem; }
+
+.be-muted { color: #888; font-size: .85rem; }
+.be-row { display: flex; justify-content: space-between; margin-top: .3rem; font-size: .9rem; }
+
+.be-badge { display: inline-block; padding: .15rem .5rem; border-radius: 999px; font-size: .75rem; font-weight: 600; margin-top: .5rem; }
+.be-badge.ok { background: #e6f6ea; color: #1e7d34; }
+.be-badge.warn { background: #fdeeea; color: #c0392b; }
+.be-badge.neutral { background: #eef1f5; color: #495867; }
+
+.be-announce { border-left: 3px solid #2c7be5; padding: .6rem 1rem; margin-bottom: .6rem; background: var(--card-bg, #fafafa); border-radius: 0 6px 6px 0; max-height: 8rem; overflow: hidden; }
+.be-announce.priority-urgente { border-color: #c0392b; }
+.be-announce.priority-eacutelevee, .be-announce.priority-élevée { border-color: #e08e0b; }
+
+.be-empty { color: #888; padding: 1rem 0; }
+.be-loading { padding: 2rem 0; text-align: center; color: #888; }
+
+.be-table { width: 100%; border-collapse: collapse; margin-top: .5rem; }
+.be-table th, .be-table td { text-align: left; padding: .5rem .6rem; border-bottom: 1px solid var(--border-color, #eee); font-size: .9rem; }
+.be-table th { color: #888; font-weight: 600; }
+
+.be-back-link { display: inline-block; margin-bottom: 1rem; color: #2c7be5; text-decoration: none; }
+.be-back-link:hover { text-decoration: underline; }
+
+.be-summary-bar { display: flex; gap: 1rem; flex-wrap: wrap; margin: 1rem 0 1.5rem; }
+.be-summary-stat { flex: 1; min-width: 140px; border: 1px solid var(--border-color, #e0e0e0); border-radius: 10px; padding: .8rem 1rem; background: var(--card-bg, #fff); }
+.be-summary-stat .value { font-size: 1.4rem; font-weight: 700; }
+.be-summary-stat .label { color: #888; font-size: .8rem; }

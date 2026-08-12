@@ -1,0 +1,67 @@
+{
+ "charts": [],
+ "content": "[{\"id\": \"Ry2aZWBDXQ\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Mes classes</b></span>\", \"col\": 12}}, {\"id\": \"SsZC7HmdGj\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Student Group\", \"col\": 3}}, {\"id\": \"B212Wo0aVh\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Student Attendance\", \"col\": 3}}, {\"id\": \"NifnzbfIER\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Assessment Result\", \"col\": 3}}, {\"id\": \"EcPQeeEUUf\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Lesson\", \"col\": 3}}, {\"id\": \"Fsnb91ICUF\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h4r21ikFd2\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Communication</b></span>\", \"col\": 12}}, {\"id\": \"AWnmetMMyH\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Attendance Alert\", \"col\": 3}}, {\"id\": \"5oOn62B0zt\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Announcement\", \"col\": 3}}]",
+ "creation": "2026-08-12 00:00:00.000000",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "education",
+ "idx": 0,
+ "is_hidden": 0,
+ "label": "Espace Enseignant",
+ "links": [],
+ "modified": "2026-08-12 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Academic",
+ "name": "Espace Enseignant",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "restrict_to_domain": "",
+ "roles": [
+  {
+   "role": "Instructor"
+  },
+  {
+   "role": "Class Teacher"
+  }
+ ],
+ "sequence_id": 20.0,
+ "shortcuts": [
+  {
+   "label": "Student Group",
+   "link_to": "Student Group",
+   "type": "DocType"
+  },
+  {
+   "label": "Student Attendance",
+   "link_to": "Student Attendance",
+   "type": "DocType"
+  },
+  {
+   "label": "Assessment Result",
+   "link_to": "Assessment Result",
+   "type": "DocType"
+  },
+  {
+   "label": "Lesson",
+   "link_to": "Lesson",
+   "type": "DocType"
+  },
+  {
+   "label": "Attendance Alert",
+   "link_to": "Attendance Alert",
+   "type": "DocType"
+  },
+  {
+   "label": "Announcement",
+   "link_to": "Announcement",
+   "type": "DocType"
+  }
+ ],
+ "title": "Espace Enseignant"
+}
