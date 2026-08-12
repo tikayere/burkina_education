@@ -1,0 +1,150 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "field:provider_name",
+ "creation": "2026-08-12 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "provider_name",
+  "provider_code",
+  "is_active",
+  "sandbox_mode",
+  "column_break_main",
+  "mode_of_payment",
+  "currency",
+  "account_number",
+  "section_break_api",
+  "api_base_url",
+  "column_break_api",
+  "api_key",
+  "api_secret",
+  "webhook_secret"
+ ],
+ "fields": [
+  {
+   "fieldname": "provider_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nom du fournisseur",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "description": "Détermine l'adaptateur utilisé (finance/mobile_money/gateway.py). \"Autre\" retombe sur un adaptateur générique non implémenté.",
+   "fieldname": "provider_code",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Type de fournisseur",
+   "options": "Orange Money\nMoov Money\nAutre",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "in_standard_filter": 1,
+   "label": "Actif"
+  },
+  {
+   "default": "1",
+   "description": "En mode bac à sable, toute transaction initiée est automatiquement confirmée lors de la vérification serveur (aucun identifiant de production n'est requis). Désactiver uniquement après avoir implémenté un appel réel à l'API du fournisseur.",
+   "fieldname": "sandbox_mode",
+   "fieldtype": "Check",
+   "label": "Mode bac à sable (sandbox)"
+  },
+  {
+   "fieldname": "column_break_main",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Utilisé pour l'écriture comptable (Payment Entry) créée lors d'une confirmation de paiement.",
+   "fieldname": "mode_of_payment",
+   "fieldtype": "Link",
+   "label": "Mode de paiement",
+   "options": "Mode of Payment",
+   "reqd": 1
+  },
+  {
+   "default": "XOF",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Devise",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "account_number",
+   "fieldtype": "Data",
+   "label": "Numéro marchand / paybill"
+  },
+  {
+   "fieldname": "section_break_api",
+   "fieldtype": "Section Break",
+   "label": "Identifiants API (jamais en dur dans le code)"
+  },
+  {
+   "fieldname": "api_base_url",
+   "fieldtype": "Data",
+   "label": "URL de base de l'API"
+  },
+  {
+   "fieldname": "column_break_api",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "api_key",
+   "fieldtype": "Password",
+   "label": "Clé API"
+  },
+  {
+   "fieldname": "api_secret",
+   "fieldtype": "Password",
+   "label": "Secret API"
+  },
+  {
+   "description": "Utilisé pour vérifier l'authenticité des callbacks/webhooks entrants.",
+   "fieldname": "webhook_secret",
+   "fieldtype": "Password",
+   "label": "Secret webhook"
+  }
+ ],
+ "icon": "fa fa-mobile",
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-08-12 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Finance",
+ "name": "Mobile Money Provider",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accountant",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
