@@ -1,0 +1,130 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "hash",
+ "creation": "2026-08-12 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "grade_name",
+  "cycle",
+  "school",
+  "column_break_main",
+  "stream",
+  "sequence",
+  "section_break_link",
+  "program"
+ ],
+ "fields": [
+  {
+   "fieldname": "grade_name",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "label": "Classe (ex: 6ème, CP1)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cycle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Cycle",
+   "options": "Cycle",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "cycle.school",
+   "fieldname": "school",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "École",
+   "options": "School",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_main",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Optionnel : pour les classes avec plusieurs séries (ex: Terminale A, Terminale D)",
+   "fieldname": "stream",
+   "fieldtype": "Data",
+   "label": "Filière / Série"
+  },
+  {
+   "default": "0",
+   "fieldname": "sequence",
+   "fieldtype": "Int",
+   "label": "Ordre d'affichage"
+  },
+  {
+   "fieldname": "section_break_link",
+   "fieldtype": "Section Break",
+   "label": "Lien académique (Education)"
+  },
+  {
+   "description": "Créé et géré automatiquement. Les inscriptions, frais et évaluations de cette classe passent par ce Program Frappe Education.",
+   "fieldname": "program",
+   "fieldtype": "Link",
+   "label": "Program",
+   "options": "Program",
+   "read_only": 1
+  }
+ ],
+ "icon": "fa fa-graduation-cap",
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-08-12 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Academic",
+ "name": "Grade",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Academic Director",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "School Director"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Registrar"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Instructor"
+  }
+ ],
+ "sort_field": "sequence",
+ "sort_order": "ASC",
+ "states": [],
+ "title_field": "grade_name",
+ "track_changes": 1
+}

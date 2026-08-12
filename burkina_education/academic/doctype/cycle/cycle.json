@@ -1,0 +1,102 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "hash",
+ "creation": "2026-08-12 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "cycle_name",
+  "education_level",
+  "school",
+  "sequence"
+ ],
+ "fields": [
+  {
+   "fieldname": "cycle_name",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "label": "Cycle",
+   "reqd": 1
+  },
+  {
+   "fieldname": "education_level",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Niveau d'enseignement",
+   "options": "Education Level",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "education_level.school",
+   "fieldname": "school",
+   "fieldtype": "Link",
+   "label": "École",
+   "options": "School",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "sequence",
+   "fieldtype": "Int",
+   "label": "Ordre d'affichage"
+  }
+ ],
+ "icon": "fa fa-sitemap",
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-08-12 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Academic",
+ "name": "Cycle",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Academic Director",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "School Director"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Registrar"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Instructor"
+  }
+ ],
+ "sort_field": "sequence",
+ "sort_order": "ASC",
+ "states": [],
+ "title_field": "cycle_name",
+ "track_changes": 1
+}

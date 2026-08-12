@@ -1,0 +1,152 @@
+{
+ "actions": [],
+ "creation": "2026-08-12 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "default_school",
+  "default_currency",
+  "default_language",
+  "section_break_grading",
+  "max_grade",
+  "passing_grade",
+  "column_break_grading",
+  "ranking_enabled",
+  "academic_terms_per_year",
+  "section_break_attendance",
+  "attendance_alert_threshold",
+  "section_break_naming",
+  "student_id_naming_format",
+  "column_break_naming",
+  "admission_naming_format",
+  "payment_naming_format"
+ ],
+ "fields": [
+  {
+   "fieldname": "default_school",
+   "fieldtype": "Link",
+   "label": "École par défaut",
+   "options": "School"
+  },
+  {
+   "default": "XOF",
+   "fieldname": "default_currency",
+   "fieldtype": "Link",
+   "label": "Devise par défaut",
+   "options": "Currency"
+  },
+  {
+   "default": "fr",
+   "fieldname": "default_language",
+   "fieldtype": "Link",
+   "label": "Langue par défaut",
+   "options": "Language"
+  },
+  {
+   "fieldname": "section_break_grading",
+   "fieldtype": "Section Break",
+   "label": "Notation et évaluation"
+  },
+  {
+   "default": "20",
+   "fieldname": "max_grade",
+   "fieldtype": "Float",
+   "label": "Note maximale"
+  },
+  {
+   "default": "10",
+   "fieldname": "passing_grade",
+   "fieldtype": "Float",
+   "label": "Note de passage"
+  },
+  {
+   "fieldname": "column_break_grading",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "ranking_enabled",
+   "fieldtype": "Check",
+   "label": "Classement activé"
+  },
+  {
+   "default": "3",
+   "fieldname": "academic_terms_per_year",
+   "fieldtype": "Int",
+   "label": "Nombre de trimestres/semestres par an"
+  },
+  {
+   "fieldname": "section_break_attendance",
+   "fieldtype": "Section Break",
+   "label": "Assiduité"
+  },
+  {
+   "default": "80",
+   "description": "En dessous de ce pourcentage de présence, une alerte est déclenchée.",
+   "fieldname": "attendance_alert_threshold",
+   "fieldtype": "Percent",
+   "label": "Seuil d'alerte d'assiduité"
+  },
+  {
+   "fieldname": "section_break_naming",
+   "fieldtype": "Section Break",
+   "label": "Formats de numérotation"
+  },
+  {
+   "default": "STU-.YYYY.-#####",
+   "fieldname": "student_id_naming_format",
+   "fieldtype": "Data",
+   "label": "Format Matricule Élève"
+  },
+  {
+   "fieldname": "column_break_naming",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "ADM-.YYYY.-#####",
+   "fieldname": "admission_naming_format",
+   "fieldtype": "Data",
+   "label": "Format Numéro d'Admission"
+  },
+  {
+   "default": "PAY-.YYYY.-#####",
+   "fieldname": "payment_naming_format",
+   "fieldtype": "Data",
+   "label": "Format Numéro de Paiement"
+  }
+ ],
+ "icon": "fa fa-cog",
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-08-12 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Settings",
+ "name": "Burkina Education Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "School Director",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Academic Director",
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

@@ -1,0 +1,234 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "field:school_code",
+ "creation": "2026-08-12 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "school_name",
+  "school_code",
+  "official_name",
+  "is_active",
+  "column_break_identity",
+  "school_type",
+  "ownership_type",
+  "section_break_contact",
+  "address_line1",
+  "address_line2",
+  "city",
+  "province",
+  "commune",
+  "country",
+  "column_break_contact",
+  "phone",
+  "email",
+  "website",
+  "section_break_branding",
+  "logo",
+  "section_break_config",
+  "default_academic_year",
+  "default_currency",
+  "default_language",
+  "company",
+  "column_break_config",
+  "timezone"
+ ],
+ "fields": [
+  {
+   "fieldname": "school_name",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "label": "Nom de l'école",
+   "reqd": 1
+  },
+  {
+   "fieldname": "school_code",
+   "fieldtype": "Data",
+   "label": "Code établissement",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "official_name",
+   "fieldtype": "Data",
+   "label": "Dénomination officielle"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Actif"
+  },
+  {
+   "fieldname": "column_break_identity",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Privé",
+   "fieldname": "school_type",
+   "fieldtype": "Select",
+   "label": "Type d'établissement",
+   "options": "Public\nPrivé\nConfessionnel\nCommunautaire\nAutre"
+  },
+  {
+   "fieldname": "ownership_type",
+   "fieldtype": "Select",
+   "label": "Statut juridique",
+   "options": "Public\nPrivé\nAssociatif\nConfessionnel\nAutre"
+  },
+  {
+   "fieldname": "section_break_contact",
+   "fieldtype": "Section Break",
+   "label": "Coordonnées"
+  },
+  {
+   "fieldname": "address_line1",
+   "fieldtype": "Data",
+   "label": "Adresse (ligne 1)"
+  },
+  {
+   "fieldname": "address_line2",
+   "fieldtype": "Data",
+   "label": "Adresse (ligne 2)"
+  },
+  {
+   "fieldname": "city",
+   "fieldtype": "Data",
+   "label": "Ville"
+  },
+  {
+   "fieldname": "province",
+   "fieldtype": "Data",
+   "label": "Province / Région"
+  },
+  {
+   "fieldname": "commune",
+   "fieldtype": "Data",
+   "label": "Commune"
+  },
+  {
+   "default": "Burkina Faso",
+   "fieldname": "country",
+   "fieldtype": "Link",
+   "label": "Pays",
+   "options": "Country"
+  },
+  {
+   "fieldname": "column_break_contact",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "phone",
+   "fieldtype": "Data",
+   "label": "Téléphone"
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "label": "Email"
+  },
+  {
+   "fieldname": "website",
+   "fieldtype": "Data",
+   "label": "Site web"
+  },
+  {
+   "fieldname": "section_break_branding",
+   "fieldtype": "Section Break",
+   "label": "Identité visuelle"
+  },
+  {
+   "fieldname": "logo",
+   "fieldtype": "Attach Image",
+   "label": "Logo"
+  },
+  {
+   "fieldname": "section_break_config",
+   "fieldtype": "Section Break",
+   "label": "Configuration"
+  },
+  {
+   "fieldname": "default_academic_year",
+   "fieldtype": "Link",
+   "label": "Année académique par défaut",
+   "options": "Academic Year"
+  },
+  {
+   "default": "XOF",
+   "fieldname": "default_currency",
+   "fieldtype": "Link",
+   "label": "Devise",
+   "options": "Currency"
+  },
+  {
+   "default": "fr",
+   "fieldname": "default_language",
+   "fieldtype": "Link",
+   "label": "Langue par défaut",
+   "options": "Language"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Société (comptabilité)",
+   "options": "Company"
+  },
+  {
+   "fieldname": "column_break_config",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Africa/Ouagadougou",
+   "fieldname": "timezone",
+   "fieldtype": "Data",
+   "label": "Fuseau horaire"
+  }
+ ],
+ "icon": "fa fa-university",
+ "image_field": "logo",
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-08-12 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "School",
+ "name": "School",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "School Director",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Academic Director"
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "school_name",
+ "track_changes": 1
+}

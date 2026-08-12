@@ -8,7 +8,7 @@ app_license = "gpl-3.0"
 # Apps
 # ------------------
 
-# required_apps = []
+required_apps = ["erpnext", "education"]
 
 # Each item in the list will be shown as an app in the apps page
 # add_to_apps_screen = [
@@ -82,8 +82,7 @@ app_license = "gpl-3.0"
 # Installation
 # ------------
 
-# before_install = "burkina_education.install.before_install"
-# after_install = "burkina_education.install.after_install"
+after_install = "burkina_education.setup.install.after_install"
 
 # Uninstallation
 # ------------
