@@ -21,10 +21,15 @@ class GradingScheme(Document):
 		if not (self.is_default and self.is_active):
 			return
 
+		# An unset Link field is stored as NULL, not "" - a plain equality
+		# filter with None silently becomes `= ''` (which matches nothing),
+		# so a blank (global) scope needs the explicit "is not set" operator.
+		education_level_filter = self.education_level or ["is", "not set"]
+
 		duplicate = frappe.db.exists(
 			"Grading Scheme",
 			{
-				"education_level": self.education_level,
+				"education_level": education_level_filter,
 				"is_default": 1,
 				"is_active": 1,
 				"name": ["!=", self.name],

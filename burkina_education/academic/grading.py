@@ -62,7 +62,11 @@ def resolve_grading_scheme(grade=None):
 		)
 		if scoped:
 			return scoped
-	return frappe.db.get_value("Grading Scheme", {"education_level": "", "is_default": 1, "is_active": 1})
+	# Link fields left unset are stored as NULL (not ""), so "blank" has to be
+	# checked with the "is not set" operator rather than an equality filter.
+	return frappe.db.get_value(
+		"Grading Scheme", {"education_level": ["is", "not set"], "is_default": 1, "is_active": 1}
+	)
 
 
 # ---------------------------------------------------------------------------
