@@ -38,7 +38,67 @@ NEW_ROLES = [
 def after_install():
 	create_roles()
 	create_custom_fields(get_custom_fields(), ignore_validate=True)
+	create_property_setters()
 	ensure_default_settings()
+
+
+def create_property_setters():
+	"""Alter behavior of Education's own fields without touching its source
+	(master.md's mandated mechanism for this — see docs/architecture.md section G).
+	"""
+	property_setters = [
+		{
+			# Student Attendance ships with Present/Absent/Leave only; the
+			# master prompt (§24) needs Late/Excused too. "Leave" is kept for
+			# backward compatibility with Education's leave_application link.
+			"doctype": "Student Attendance",
+			"fieldname": "status",
+			"property": "options",
+			"value": "Present\nAbsent\nLate\nExcused\nLeave",
+		},
+		{
+			# Every modification to submitted marks must be auditable (§20).
+			# Education doesn't turn this on by default.
+			"doctype": "Assessment Result",
+			"fieldname": None,
+			"property": "track_changes",
+			"value": "1",
+		},
+	]
+
+	for ps in property_setters:
+		_set_property(**ps)
+
+
+def _set_property(doctype, fieldname, property, value):
+	from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+
+	# Property Setter has no natural autoname, so re-running this (e.g. a
+	# second after_install, or a manual re-run during development) would
+	# otherwise stack up duplicate rows - guard explicitly instead. Query by
+	# SQL directly since `field_name` is NULL (not "") for doctype-level
+	# properties, and dict-filter equality against None is unreliable.
+	rows = frappe.db.sql(
+		"""select name, value from `tabProperty Setter`
+		where doc_type=%(doctype)s and property=%(property)s
+		and field_name {op}""".format(op="is null" if fieldname is None else "= %(fieldname)s"),
+		{"doctype": doctype, "property": property, "fieldname": fieldname},
+		as_dict=True,
+	)
+	if rows:
+		if rows[0].value != value:
+			frappe.db.set_value("Property Setter", rows[0].name, "value", value)
+		return
+
+	property_type = "Check" if property == "track_changes" else "Text"
+	make_property_setter(
+		doctype,
+		fieldname,
+		property,
+		value,
+		property_type,
+		for_doctype=fieldname is None,
+	)
 
 
 def create_roles():
@@ -200,6 +260,33 @@ def get_custom_fields():
 				"fieldtype": "Float",
 				"default": "1",
 				"insert_after": "sequence",
+			},
+		],
+		# Phase 2 - grading engine (docs/architecture.md section G): Assessment
+		# Plan has no notion of an assessment's category/coefficient upstream.
+		"Assessment Plan": [
+			{
+				"fieldname": "assessment_type",
+				"label": "Type d'évaluation",
+				"fieldtype": "Link",
+				"options": "Assessment Type",
+				"insert_after": "assessment_group",
+			},
+			{
+				"fieldname": "coefficient",
+				"label": "Coefficient",
+				"fieldtype": "Float",
+				"default": "1",
+				"description": "Pré-rempli depuis le Type d'évaluation ; modifiable pour ce plan précis.",
+				"insert_after": "assessment_type",
+			},
+		],
+		"Student Attendance": [
+			{
+				"fieldname": "remarks",
+				"label": "Remarques",
+				"fieldtype": "Small Text",
+				"insert_after": "status",
 			},
 		],
 	}

@@ -1,5 +1,7 @@
 School
 Academic
+Attendance
+Examinations
 Student
 Guardian
 Admissions

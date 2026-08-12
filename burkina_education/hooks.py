@@ -136,13 +136,16 @@ after_install = "burkina_education.setup.install.after_install"
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
-# }
+doc_events = {
+	"Assessment Result": {
+		# Marks are locked on submit; cancelling (the only way to change them
+		# afterwards, via amend) must be restricted to authorized roles even
+		# though Education's own "Academics User" role grants blanket cancel
+		# rights (docs/architecture.md section G explains why this is a hook,
+		# not a Custom DocPerm rewrite).
+		"before_cancel": "burkina_education.academic.grading.guard_assessment_result_cancel",
+	},
+}
 
 # Scheduled Tasks
 # ---------------
