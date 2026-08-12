@@ -1,0 +1,171 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "hash",
+ "creation": "2026-08-12 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "student",
+  "student_name",
+  "column_break_main",
+  "status",
+  "section_break_period",
+  "from_date",
+  "to_date",
+  "column_break_period",
+  "total_days",
+  "present_count",
+  "absent_count",
+  "late_count",
+  "section_break_result",
+  "attendance_percentage",
+  "threshold",
+  "notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "student",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Élève",
+   "options": "Student",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "student.student_name",
+   "fieldname": "student_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nom",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_main",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "New",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Statut",
+   "options": "New\nAcknowledged\nNotified"
+  },
+  {
+   "fieldname": "section_break_period",
+   "fieldtype": "Section Break",
+   "label": "Période analysée"
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "Du",
+   "reqd": 1
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "Au",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_period",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_days",
+   "fieldtype": "Int",
+   "label": "Jours enregistrés"
+  },
+  {
+   "fieldname": "present_count",
+   "fieldtype": "Int",
+   "label": "Présences"
+  },
+  {
+   "fieldname": "absent_count",
+   "fieldtype": "Int",
+   "label": "Absences"
+  },
+  {
+   "fieldname": "late_count",
+   "fieldtype": "Int",
+   "label": "Retards"
+  },
+  {
+   "fieldname": "section_break_result",
+   "fieldtype": "Section Break",
+   "label": "Résultat"
+  },
+  {
+   "fieldname": "attendance_percentage",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Taux de présence"
+  },
+  {
+   "fieldname": "threshold",
+   "fieldtype": "Percent",
+   "label": "Seuil déclencheur"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  }
+ ],
+ "icon": "fa fa-exclamation-triangle",
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-08-12 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Attendance",
+ "name": "Attendance Alert",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Academic Director",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "School Director"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "write": 1,
+   "role": "Class Teacher"
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "student_name",
+ "track_changes": 1
+}

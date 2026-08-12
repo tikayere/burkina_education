@@ -150,23 +150,13 @@ doc_events = {
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-# 	"all": [
-# 		"burkina_education.tasks.all"
-# 	],
-# 	"daily": [
-# 		"burkina_education.tasks.daily"
-# 	],
-# 	"hourly": [
-# 		"burkina_education.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"burkina_education.tasks.weekly"
-# 	],
-# 	"monthly": [
-# 		"burkina_education.tasks.monthly"
-# 	],
-# }
+scheduler_events = {
+	"daily": [
+		# master.md §24: detect attendance below the configured threshold every
+		# day. Notifying the guardian/administration is Phase 4 (Communication).
+		"burkina_education.attendance.alerts.run_attendance_alerts",
+	],
+}
 
 # Testing
 # -------
