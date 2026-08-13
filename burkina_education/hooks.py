@@ -68,13 +68,22 @@ web_include_css = "/assets/burkina_education/css/portal.css"
 # application home page (will override Website Settings)
 # home_page = "login"
 
-# website user home page (by Role) - Guardian/Student Portals (master.md
-# §29/§30) so a portal login lands directly on the useful page instead of
-# the generic Frappe website home.
+# website user home page (by Role) - Student/Guardian/Teacher Portals
+# (master.md §29/§30/§31) all now live in one Vue SPA (frontend/, see
+# docs/architecture.md section L) mounted at "/portal"; the SPA's own router
+# picks the right dashboard from frappe.boot.user.roles once loaded. This
+# superseded the Jinja www/parent, www/student pages Phase 4 originally
+# built (kept on disk, unlinked, in case they're ever wanted again).
 role_home_page = {
-	"Guardian": "parent",
-	"Student": "student",
+	"Guardian": "portal",
+	"Student": "portal",
+	"Instructor": "portal",
 }
+
+# Vue 3 + frappe-ui SPA (frontend/) - one build serving all three portals.
+website_route_rules = [
+	{"from_route": "/portal/<path:app_path>", "to_route": "portal"},
+]
 
 # Generators
 # ----------

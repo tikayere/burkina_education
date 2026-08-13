@@ -130,9 +130,17 @@ def _guardians_of(student_names):
 
 
 def _teacher_users():
-	rows = frappe.get_all(
-		"Instructor", filters={"status": "Active"}, pluck="user_id"
-	)
+	# Instructor has no ``user_id``/``user`` field of its own - only
+	# ``employee``, and Employee is what actually carries ``user_id``
+	# (standard ERPNext field). Plucking "user_id" directly off Instructor
+	# was a latent bug (never caught because "All Teachers" had no test
+	# coverage - see docs/architecture.md section L, found while building
+	# the Teacher Portal's own identity resolution, which needs the same
+	# Instructor -> Employee -> User chain).
+	employees = frappe.get_all("Instructor", filters={"status": "Active"}, pluck="employee")
+	if not employees:
+		return []
+	rows = frappe.get_all("Employee", filters={"name": ["in", employees]}, pluck="user_id")
 	return [u for u in dict.fromkeys(rows) if u]
 
 

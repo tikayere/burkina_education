@@ -1,0 +1,9 @@
+node_modules
+dist
+.vite
+*.local
+
+# unplugin-auto-import / unplugin-vue-components - regenerated on every
+# `yarn dev`/`yarn build`, not hand-authored.
+auto-imports.d.ts
+components.d.ts

@@ -1,0 +1,33 @@
+/* A bare "frappe-ui/style.css" specifier goes through the package's
+   "exports" map (./style.css -> ./src/style.css) - which this Vite/postcss
+   combination fails to follow from inside a plain CSS @import ("Missing
+   './src/style.css' specifier"). A relative path into node_modules
+   sidesteps package-exports resolution entirely. */
+@import "../node_modules/frappe-ui/src/style.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#app {
+	height: 100%;
+}
+
+body {
+	@apply bg-gray-50 text-gray-900;
+}
+
+/* Small, consistent scrollbar across the portal - the default one looks
+   out of place against the rest of the frappe-ui-styled chrome. */
+::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+::-webkit-scrollbar-thumb {
+	@apply bg-gray-300 rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+	@apply bg-gray-400;
+}
