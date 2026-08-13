@@ -33,10 +33,11 @@ class TestAcademicApi(FrappeTestCase):
 		finally:
 			frappe.set_user("Administrator")
 
-	def test_registrar_sees_structure_only(self):
+	def test_registrar_sees_structure_and_admissions_only(self):
 		user = self.fx.staff_user("Registrar")
 		data = self._as(user, academic_api.get_dashboard)
 		self.assertIn("structure", data)
+		self.assertIn("admissions", data)
 		self.assertNotIn("exams", data)
 		self.assertNotIn("director", data)
 
@@ -45,6 +46,7 @@ class TestAcademicApi(FrappeTestCase):
 		data = self._as(user, academic_api.get_dashboard)
 		self.assertIn("exams", data)
 		self.assertNotIn("structure", data)
+		self.assertNotIn("admissions", data)
 		self.assertNotIn("director", data)
 
 	def test_academic_director_sees_everything(self):
@@ -52,4 +54,5 @@ class TestAcademicApi(FrappeTestCase):
 		data = self._as(user, academic_api.get_dashboard)
 		self.assertIn("structure", data)
 		self.assertIn("exams", data)
+		self.assertIn("admissions", data)
 		self.assertIn("director", data)

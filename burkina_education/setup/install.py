@@ -61,6 +61,7 @@ def after_install():
 	create_portal_permissions()
 	create_department_head_permissions()
 	create_receptionist_permissions()
+	create_admissions_permissions()
 	enable_xof_currency()
 	ensure_item_group_root()
 	ensure_stock_uom_default()
@@ -98,6 +99,7 @@ TITLE_LINK_DOCTYPES = [
 	"Fee Structure",
 	"Employee",
 	"Driver",
+	"Student Applicant",
 ]
 
 
@@ -122,6 +124,45 @@ def create_property_setters():
 			"fieldname": None,
 			"property": "track_changes",
 			"value": "1",
+		},
+		{
+			# Admissions (§13, docs/architecture.md section O): retargets
+			# Education's own Applied/Approved/Rejected/Admitted onto this
+			# pipeline's 8-state funnel. admissions/overrides.py's
+			# transition methods are the only intended way to move between
+			# these - the field itself stays read_only (already true on
+			# Education's own field definition).
+			"doctype": "Student Applicant",
+			"fieldname": "application_status",
+			"property": "options",
+			"value": "Brouillon\nSoumise\nEn cours d'examen\nAcceptée\nRejetée\nListe d'attente\nInscrite\nRetirée",
+		},
+		{
+			"doctype": "Student Applicant",
+			"fieldname": "application_status",
+			"property": "default",
+			"value": "Brouillon",
+		},
+		{
+			# Matches the prefix from Burkina Education Settings.admission_
+			# naming_format's own documented default ("ADM-.YYYY.-#####") -
+			# offered as an additional naming series option alongside
+			# Education's own, and made the default for new applications.
+			# No trailing "#####" here: set_name_by_naming_series() (Frappe
+			# core) already appends ".#####" itself - including it in the
+			# series value too produced literal "-#####" text followed by the
+			# real counter (e.g. "ADM-2026-#####00001") instead of
+			# "ADM-2026-00001", caught by admissions/tests/test_admissions.py.
+			"doctype": "Student Applicant",
+			"fieldname": "naming_series",
+			"property": "options",
+			"value": "ADM-.YYYY.-\nEDU-APP-.YYYY.-",
+		},
+		{
+			"doctype": "Student Applicant",
+			"fieldname": "naming_series",
+			"property": "default",
+			"value": "ADM-.YYYY.-",
 		},
 	]
 	property_setters += [
@@ -187,6 +228,12 @@ CLIENT_SCRIPTS = [
 		"dt": "Student",
 		"view": "Form",
 		"script_path": ("messaging", "client_scripts", "student_portal_invite.js"),
+	},
+	{
+		"name": "Burkina Education: Admissions Pipeline Buttons",
+		"dt": "Student Applicant",
+		"view": "Form",
+		"script_path": ("admissions", "client_scripts", "student_applicant_admissions.js"),
 	},
 ]
 
@@ -303,6 +350,29 @@ def create_receptionist_permissions():
 		add_permission(doctype, "Receptionist", 0)
 		for ptype in ("read", "report"):
 			update_permission_property(doctype, "Receptionist", 0, ptype, 1)
+
+
+#: Admissions (§13, docs/architecture.md section O). Registrar owns the
+#: pipeline day-to-day (matches its master.md-named role); Academic
+#: Director/School Director get the same rights for oversight, mirroring how
+#: both already sit above Registrar on every other academic doctype (section
+#: D/M). Deliberately NOT granted to Secretary - section M's own permission
+#: audit found Secretary's real, already-implemented scope is
+#: communications-only (Announcement/Announcement Template), and admissions
+#: intake is front-office *registration* work, not messaging.
+ADMISSIONS_FULL_ACCESS_ROLES = ("Registrar", "Academic Director", "School Director")
+
+
+def create_admissions_permissions():
+	from frappe.permissions import add_permission, update_permission_property
+
+	for role in ADMISSIONS_FULL_ACCESS_ROLES:
+		add_permission("Student Applicant", role, 0)
+		for ptype in ("read", "write", "create", "print", "email", "report", "export"):
+			update_permission_property("Student Applicant", role, 0, ptype, 1)
+		if role == "Registrar":
+			continue
+		update_permission_property("Student Applicant", role, 0, "delete", 1)
 
 
 def enable_xof_currency():
@@ -617,6 +687,238 @@ def get_custom_fields():
 				"label": "Remarques",
 				"fieldtype": "Small Text",
 				"insert_after": "status",
+			},
+		],
+		# Admissions (§13, docs/architecture.md section O): everything the
+		# Application -> Review -> Acceptance -> Admission -> Enrollment
+		# pipeline needs on top of Education's own Student Applicant
+		# (identity, guardians, siblings, application_status - reused as-is,
+		# see section B). admissions/overrides.py drives all of it.
+		"Student Applicant": [
+			{
+				"fieldname": "admission_pipeline_tab",
+				"label": "Admission",
+				"fieldtype": "Tab Break",
+				"insert_after": "country",
+			},
+			{
+				"fieldname": "requested_grade",
+				"label": "Classe demandée",
+				"fieldtype": "Link",
+				"options": "Grade",
+				"reqd": 1,
+				"in_list_view": 1,
+				"in_standard_filter": 1,
+				"insert_after": "admission_pipeline_tab",
+			},
+			{
+				"fieldname": "previous_school",
+				"label": "École précédente",
+				"fieldtype": "Data",
+				"insert_after": "requested_grade",
+			},
+			{
+				"fieldname": "column_break_admission_main",
+				"fieldtype": "Column Break",
+				"insert_after": "previous_school",
+			},
+			{
+				"fieldname": "documents",
+				"label": "Documents requis",
+				"fieldtype": "Table",
+				"options": "Admission Document",
+				"insert_after": "column_break_admission_main",
+			},
+			{
+				"fieldname": "section_break_interview",
+				"label": "Entretien",
+				"fieldtype": "Section Break",
+				"insert_after": "documents",
+			},
+			{
+				"fieldname": "interview_required",
+				"label": "Entretien requis",
+				"fieldtype": "Check",
+				"insert_after": "section_break_interview",
+			},
+			{
+				"fieldname": "interview_date",
+				"label": "Date de l'entretien",
+				"fieldtype": "Datetime",
+				"insert_after": "interview_required",
+			},
+			{
+				"fieldname": "column_break_interview",
+				"fieldtype": "Column Break",
+				"insert_after": "interview_date",
+			},
+			{
+				"fieldname": "interviewer",
+				"label": "Responsable de l'entretien",
+				"fieldtype": "Link",
+				"options": "Employee",
+				"insert_after": "column_break_interview",
+			},
+			{
+				"fieldname": "interview_result",
+				"label": "Résultat de l'entretien",
+				"fieldtype": "Select",
+				"options": "\nFavorable\nDéfavorable\nSous réserve",
+				"insert_after": "interviewer",
+			},
+			{
+				"fieldname": "interview_notes",
+				"label": "Notes d'entretien",
+				"fieldtype": "Small Text",
+				"insert_after": "interview_result",
+			},
+			{
+				"fieldname": "section_break_entrance_exam",
+				"label": "Examen d'entrée",
+				"fieldtype": "Section Break",
+				"insert_after": "interview_notes",
+			},
+			{
+				"fieldname": "entrance_exam_required",
+				"label": "Examen d'entrée requis",
+				"fieldtype": "Check",
+				"insert_after": "section_break_entrance_exam",
+			},
+			{
+				"fieldname": "entrance_exam_date",
+				"label": "Date de l'examen",
+				"fieldtype": "Date",
+				"insert_after": "entrance_exam_required",
+			},
+			{
+				"fieldname": "column_break_entrance_exam",
+				"fieldtype": "Column Break",
+				"insert_after": "entrance_exam_date",
+			},
+			{
+				"fieldname": "entrance_exam_score",
+				"label": "Note obtenue",
+				"fieldtype": "Float",
+				"insert_after": "column_break_entrance_exam",
+			},
+			{
+				"fieldname": "entrance_exam_max_score",
+				"label": "Note maximale",
+				"fieldtype": "Float",
+				"default": "20",
+				"insert_after": "entrance_exam_score",
+			},
+			{
+				"fieldname": "entrance_exam_passed",
+				"label": "Examen réussi",
+				"fieldtype": "Check",
+				"read_only": 1,
+				"insert_after": "entrance_exam_max_score",
+			},
+			{
+				"fieldname": "section_break_decision",
+				"label": "Décision",
+				"fieldtype": "Section Break",
+				"insert_after": "entrance_exam_passed",
+			},
+			{
+				"fieldname": "decision_notes",
+				"label": "Motif de la décision",
+				"fieldtype": "Small Text",
+				"insert_after": "section_break_decision",
+			},
+			{
+				"fieldname": "column_break_decision",
+				"fieldtype": "Column Break",
+				"insert_after": "decision_notes",
+			},
+			{
+				"fieldname": "decision_by",
+				"label": "Décidé par",
+				"fieldtype": "Link",
+				"options": "User",
+				"read_only": 1,
+				"insert_after": "column_break_decision",
+			},
+			{
+				"fieldname": "decision_date",
+				"label": "Date de décision",
+				"fieldtype": "Date",
+				"read_only": 1,
+				"insert_after": "decision_by",
+			},
+			{
+				"fieldname": "section_break_admission_fee",
+				"label": "Frais d'inscription",
+				"fieldtype": "Section Break",
+				"insert_after": "decision_date",
+			},
+			{
+				"fieldname": "admission_fee_required",
+				"label": "Frais d'inscription requis",
+				"fieldtype": "Check",
+				"default": "1",
+				"insert_after": "section_break_admission_fee",
+			},
+			{
+				"fieldname": "admission_fee_amount",
+				"label": "Montant",
+				"fieldtype": "Currency",
+				"insert_after": "admission_fee_required",
+			},
+			{
+				"fieldname": "column_break_admission_fee",
+				"fieldtype": "Column Break",
+				"insert_after": "admission_fee_amount",
+			},
+			{
+				"fieldname": "admission_fee_paid",
+				"label": "Frais payés",
+				"fieldtype": "Check",
+				"read_only": 1,
+				"insert_after": "column_break_admission_fee",
+			},
+			{
+				"fieldname": "admission_fee_payment_date",
+				"label": "Date de paiement",
+				"fieldtype": "Date",
+				"read_only": 1,
+				"insert_after": "admission_fee_paid",
+			},
+			{
+				"fieldname": "admission_fee_mode_of_payment",
+				"label": "Mode de paiement",
+				"fieldtype": "Link",
+				"options": "Mode of Payment",
+				"insert_after": "admission_fee_payment_date",
+			},
+			{
+				"fieldname": "section_break_enrollment_result",
+				"label": "Inscription",
+				"fieldtype": "Section Break",
+				"insert_after": "admission_fee_mode_of_payment",
+			},
+			{
+				"fieldname": "enrolled_student",
+				"label": "Élève créé",
+				"fieldtype": "Link",
+				"options": "Student",
+				"read_only": 1,
+				"insert_after": "section_break_enrollment_result",
+			},
+			{
+				"fieldname": "enrolled_program_enrollment",
+				"label": "Inscription (Program Enrollment)",
+				"fieldtype": "Link",
+				"options": "Program Enrollment",
+				"read_only": 1,
+				"insert_after": "enrolled_student",
+			},
+			{
+				"fieldname": "withdrawal_reason",
+				"label": "Motif de retrait",
+				"fieldtype": "Small Text",
+				"insert_after": "enrolled_program_enrollment",
 			},
 		],
 	}

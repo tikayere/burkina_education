@@ -42,6 +42,8 @@
 
 **Vie scolaire** — Discipline, infirmerie (données médicales strictement cloisonnées), bibliothèque (catalogue/emprunts/retards), transport (itinéraires/affectations), cantine (formules/abonnements), internat (bâtiments/chambres/lits).
 
+**Admissions** — Candidature → Examen du dossier → Décision → Inscription : dossier candidat (classe demandée, école précédente, documents requis, entretien, examen d'entrée), décision (acceptée/rejetée/liste d'attente), frais d'inscription, puis création automatique de l'élève et de son inscription (Program Enrollment) une fois acceptée. Les élèves ne sont plus créés directement — l'admission est désormais le seul point d'entrée.
+
 **Sécurité & auditabilité** — Permissions par rôle appliquées côté serveur (jamais uniquement côté client), permissions documentaires pour cloisonner un Tuteur à ses seuls enfants, journal des modifications sur les données sensibles (notes, paiements, statut élève).
 
 **Multi-portails** — Un seul SPA Vue 3 + frappe-ui, douze espaces (voir plus bas), et un utilisateur cumulant plusieurs rôles voit désormais **toutes** ses sections dans une même barre latérale — plus besoin de « changer d'espace » pour retrouver l'information d'un autre rôle.
@@ -54,7 +56,7 @@ Chaque rôle ne voit que ce qui relève de sa responsabilité (permissions appli
 |---|---|---|
 | **School Director** (Directeur) | Vue d'ensemble de l'école : effectifs, présence, résultats, recouvrement des frais, alertes ; supervision de la discipline ; premier arrivé sur l'Assistant de configuration. | Portail (Direction) + Desk |
 | **Academic Director** (Directeur des études) | Structure académique complète, pédagogie (curriculum/compétences/leçons), discipline, bourses, annonces, réglages académiques. | Portail (Scolarité) + Desk |
-| **Registrar** (Secrétaire académique) | Configuration de la structure scolaire seule (Campus, Cycle, Niveau, Classe) — sous-ensemble du Directeur des études. | Portail (Scolarité) |
+| **Registrar** (Secrétaire académique) | Admissions (candidature → décision → inscription) et configuration de la structure scolaire (Campus, Cycle, Niveau, Classe) — sous-ensemble du Directeur des études. | Portail (Scolarité) |
 | **Examination Coordinator** (Coordinateur des examens) | Création et planification des examens, détection des conflits de salle/surveillant. | Portail (Scolarité) |
 | **Department Head** (Chef de département) | Compétences, unités d'apprentissage et leçons de son département — mêmes droits qu'un enseignant sur la pédagogie, sans les outils d'administration du Directeur des études. | Portail (Scolarité) |
 | **Secretary** (Secrétariat) | Annonces et modèles de communication (SMS/WhatsApp/e-mail). | Portail (Communication) |
@@ -133,9 +135,9 @@ pre-commit install
 ## État du projet
 
 - **Phases 1 à 5** (fondations, pédagogie, finances, communication, vie scolaire) : terminées. Voir le suivi détaillé dans `docs/architecture.md` du dépôt de projet.
+- **Admissions** (candidature → examen du dossier → décision → inscription, `prompts/master.md` §13) : terminé. Les élèves ne sont plus créés directement — voir `docs/architecture.md` section O du dépôt de projet.
 - **Phases 6 et 7** (multi-établissement à grande échelle, reporting ministériel, IA) : non démarrées, conformément à la feuille de route de `prompts/master.md`.
-- **Écart connu** : le module Admissions (candidature → entretien → décision → inscription, `prompts/master.md` §13) n'est pas encore implémenté — les élèves sont aujourd'hui inscrits directement. C'est la prochaine fondation à construire avant la Phase 6.
-- École de démonstration : **École Pilote Burkina**, données idempotentes (`bench execute burkina_education.setup.demo_data.run`) — classes, élèves, tuteurs, enseignants, notes, bulletins, factures, paiement Mobile Money simulé, bourse, annonce publiée.
+- École de démonstration : **École Pilote Burkina**, données idempotentes (`bench execute burkina_education.setup.demo_data.run`) — classes, élèves, tuteurs, enseignants, notes, bulletins, factures, paiement Mobile Money simulé, bourse, annonce publiée, et trois candidatures d'admission à différents stades du parcours.
 
 ---
 

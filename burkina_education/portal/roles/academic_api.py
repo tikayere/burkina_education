@@ -4,8 +4,9 @@
 """Whitelisted API for the Vue Academic Portal, shared by four roles whose
 real permissions nest inside one another (docs/architecture.md section M):
 
-- Registrar: Campus / Cycle / Education Level / Grade only (academic
-  reference-data setup).
+- Registrar: Campus / Cycle / Education Level / Grade (academic
+  reference-data setup) plus Student Applicant - Admissions (§13,
+  docs/architecture.md section O) is this role's actual day-to-day job.
 - Examination Coordinator: Examination / Examination Schedule only.
 - Department Head: Competency / Learning Unit / Lesson / Learning Objective
   (read-write) plus Curriculum / Course (read-only) - the same authoring
@@ -36,12 +37,19 @@ def get_dashboard():
 	has_structure = is_director or "Registrar" in roles
 	has_exams = is_director or "Examination Coordinator" in roles
 	has_pedagogy = is_director or "Department Head" in roles
+	# Same condition as has_structure today (Registrar/Academic Director) -
+	# kept as its own flag since it's a distinct feature area (setup/install.py
+	# ::ADMISSIONS_FULL_ACCESS_ROLES also grants School Director, which has no
+	# portal presence here - School Director's own "leadership" portal is a
+	# read-only cross-portal summary, see docs/architecture.md section M).
+	has_admissions = is_director or "Registrar" in roles
 
 	out = {
 		"is_director": is_director,
 		"has_structure": has_structure,
 		"has_exams": has_exams,
 		"has_pedagogy": has_pedagogy,
+		"has_admissions": has_admissions,
 	}
 
 	if has_pedagogy:
@@ -49,6 +57,29 @@ def get_dashboard():
 			"curriculum_count": frappe.db.count("Curriculum"),
 			"competency_count": frappe.db.count("Competency"),
 			"lesson_count": frappe.db.count("Lesson"),
+		}
+
+	if has_admissions:
+		out["admissions"] = {
+			"submitted": frappe.db.count("Student Applicant", {"application_status": "Soumise"}),
+			"under_review": frappe.db.count("Student Applicant", {"application_status": "En cours d'examen"}),
+			"waitlisted": frappe.db.count("Student Applicant", {"application_status": "Liste d'attente"}),
+			"ready_to_enroll": frappe.db.count(
+				"Student Applicant",
+				{
+					"application_status": "Acceptée",
+					"admission_fee_required": 0,
+				},
+			)
+			+ frappe.db.count(
+				"Student Applicant",
+				{
+					"application_status": "Acceptée",
+					"admission_fee_required": 1,
+					"admission_fee_paid": 1,
+				},
+			),
+			"enrolled_this_year": frappe.db.count("Student Applicant", {"application_status": "Inscrite"}),
 		}
 
 	if has_structure:

@@ -178,6 +178,11 @@ override_doctype_class = {
 	# every Fee Schedule save - see finance/overrides.py and
 	# docs/architecture.md section H.
 	"Fee Schedule": "burkina_education.finance.overrides.FeeSchedule",
+	# Admissions (master.md §13): adds the Application -> Review -> Acceptance
+	# -> Admission -> Enrollment pipeline's own whitelisted transition methods
+	# on top of Education's own Student Applicant - see admissions/overrides.py
+	# and docs/architecture.md section O.
+	"Student Applicant": "burkina_education.admissions.overrides.StudentApplicant",
 }
 
 # Document Events

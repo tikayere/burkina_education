@@ -8,6 +8,11 @@ repeatedly (``bench execute burkina_education.setup.demo_data.run``); every
 step checks for an existing record before creating one.
 
 Phase 1: school, academic structure, subjects, students/guardians.
+Admissions (§13, docs/architecture.md section O): three Student Applicants at
+different pipeline stages - one walked all the way through to a real
+enrolled Student (exercising submit/review/decide/fee/enroll for real), one
+left mid-review, one decided Waitlisted - so the Registrar's dashboard/portal
+has a real spread instead of an empty funnel.
 Phase 2: a Grading Scheme, Assessment Types, one Student Group per demo
 grade, a first-term Assessment Plan/Result per student, Student Attendance,
 and a computed+ranked+submitted Student Term Report per student - so the
@@ -121,6 +126,42 @@ STUDENTS = [
 	),
 ]
 
+# Admissions (§13, docs/architecture.md section O): three applications at
+# different pipeline stages, so the Registrar's dashboard/portal has a real
+# spread to show rather than an empty funnel. (first, last, sex, grade,
+# email, guardian(name, relation, phone), final_stage)
+# final_stage: "enroll" walks all the way to a real Student; "review" stops
+# mid-pipeline; "waitlist" is decided but not yet enrolled.
+ADMISSIONS_APPLICANTS = [
+	(
+		"Boureima",
+		"Sawadogo",
+		"Male",
+		"CP1",
+		"boureima.sawadogo@epb-demo.bf",
+		("Aminata Kaboré", "Mother", "+22670000003"),
+		"enroll",
+	),
+	(
+		"Aïssata",
+		"Zongo",
+		"Female",
+		"6ème",
+		"aissata.zongo@epb-demo.bf",
+		("Boukary Zongo", "Father", "+22670000004"),
+		"review",
+	),
+	(
+		"Karim",
+		"Diallo",
+		"Male",
+		"5ème",
+		"karim.diallo@epb-demo.bf",
+		("Mariam Diallo", "Mother", "+22670000005"),
+		"waitlist",
+	),
+]
+
 
 def run():
 	ensure_genders()
@@ -131,6 +172,7 @@ def run():
 	grades_by_name = create_academic_structure(school)
 	create_subjects()
 	create_students(school, grades_by_name)
+	admissions_demo = create_admissions_demo(academic_year, grades_by_name)
 
 	# Phase 4 setup runs before anything that can trigger a notification
 	# (Student Term Report/Payment Entry submission below) so those hooks
@@ -185,6 +227,7 @@ def run():
 		"asset_categories": asset_categories,
 		"canteen_subscription": canteen_subscription,
 		"boarding_assignment": boarding_assignment,
+		"admissions_demo": admissions_demo,
 	}
 
 
@@ -399,6 +442,90 @@ def _create_students(school, grades_by_name, guardians_by_name):
 			)
 
 		student.insert(ignore_permissions=True)
+
+
+def create_admissions_demo(academic_year, grades_by_name):
+	"""Application -> Review -> Acceptance -> Admission -> Enrollment
+	(master.md §13, docs/architecture.md section O), exercised on real demo
+	data at three different stages - not only in tests. Runs after
+	create_students() (same Education Settings user-creation-skip guard
+	applies to the Student the "enroll" applicant produces)."""
+	education_settings = frappe.get_single("Education Settings")
+	previous_skip_value = education_settings.user_creation_skip
+	frappe.db.set_single_value("Education Settings", "user_creation_skip", 1)
+
+	created = {}
+	try:
+		for first, last, sex, grade_name, email, guardian, final_stage in ADMISSIONS_APPLICANTS:
+			full_name = f"{first} {last}"
+			applicant_name = frappe.db.get_value("Student Applicant", {"title": full_name}, "name")
+			if applicant_name:
+				created[full_name] = applicant_name
+				continue
+
+			grade = grades_by_name.get(grade_name)
+			guardian_name, relation, phone = guardian
+			guardian_docname = frappe.db.get_value("Guardian", {"guardian_name": guardian_name}, "name")
+			if not guardian_docname:
+				guardian_docname = (
+					frappe.get_doc(
+						{
+							"doctype": "Guardian",
+							"guardian_name": guardian_name,
+							"mobile_number": phone,
+							"preferred_channel": "SMS",
+							"sms_consent": 1,
+							"portal_access": 1,
+							"payment_responsibility": 1,
+						}
+					)
+					.insert(ignore_permissions=True)
+					.name
+				)
+
+			applicant = frappe.get_doc(
+				{
+					"doctype": "Student Applicant",
+					"first_name": first,
+					"last_name": last,
+					"gender": sex,
+					"student_email_id": email,
+					"academic_year": academic_year,
+					"requested_grade": grade,
+					"guardians": [{"guardian": guardian_docname, "relation": relation}],
+				}
+			).insert(ignore_permissions=True)
+
+			applicant.submit_application()
+			applicant.start_review()
+
+			if final_stage == "review":
+				created[full_name] = applicant.name
+				continue
+
+			if final_stage == "waitlist":
+				applicant.record_decision(
+					"Liste d'attente",
+					notes="Dossier favorable, en attente d'une place disponible dans la classe.",
+				)
+				created[full_name] = applicant.name
+				continue
+
+			# "enroll": accept, collect the admission fee, then enroll -
+			# creates a real Student + Program Enrollment. Same amount as the
+			# "Frais d'inscription" Fee Category below - collect_admission_fee()
+			# requires a non-zero admission_fee_amount, which has no default.
+			applicant.record_decision("Acceptée", notes="Entretien favorable, dossier complet.")
+			applicant.admission_fee_amount = 15000
+			applicant.save()
+			applicant.collect_admission_fee(mode_of_payment="Espèces")
+			result = applicant.enroll()
+			created[full_name] = applicant.name
+			created[f"{full_name} (élève)"] = result["student"]
+	finally:
+		frappe.db.set_single_value("Education Settings", "user_creation_skip", previous_skip_value)
+
+	return created
 
 
 def create_grading_scheme():

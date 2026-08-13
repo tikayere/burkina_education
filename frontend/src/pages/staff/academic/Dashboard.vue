@@ -10,6 +10,13 @@
 			<StatCard label="Classes" :value="data.structure.grades" icon="grid" tone="gray" />
 		</div>
 
+		<div v-if="data.admissions" class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+			<StatCard label="Candidatures soumises" :value="data.admissions.submitted" icon="inbox" tone="gray" />
+			<StatCard label="En cours d'examen" :value="data.admissions.under_review" icon="search" tone="gold" />
+			<StatCard label="Prêtes à enrôler" :value="data.admissions.ready_to_enroll" icon="check-circle" :tone="data.admissions.ready_to_enroll ? 'green' : 'gray'" />
+			<StatCard label="Liste d'attente" :value="data.admissions.waitlisted" icon="clock" tone="gray" />
+		</div>
+
 		<div v-if="data.exams" class="grid gap-6 lg:grid-cols-2">
 			<SectionCard title="Examens à venir" no-padding>
 				<EmptyState v-if="!data.exams.upcoming.length" icon="clipboard" title="Aucun examen programmé" />

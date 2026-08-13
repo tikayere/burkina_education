@@ -94,6 +94,9 @@ const academicFlags = computed(() => ({
 	hasStructure: session.roles.includes("Academic Director") || session.roles.includes("Registrar"),
 	hasExams: session.roles.includes("Academic Director") || session.roles.includes("Examination Coordinator"),
 	hasPedagogy: session.roles.includes("Academic Director") || session.roles.includes("Department Head"),
+	// Admissions (§13) - same pair of roles as hasStructure today, kept as
+	// its own flag since it gates a distinct nav item/route.
+	hasAdmissions: session.roles.includes("Academic Director") || session.roles.includes("Registrar"),
 }));
 
 function navItemsForPortal(portal) {
