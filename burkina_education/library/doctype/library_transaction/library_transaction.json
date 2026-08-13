@@ -1,0 +1,167 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "naming_series:",
+ "creation": "2026-08-13 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "membership",
+  "student",
+  "column_break_main",
+  "book_copy",
+  "book_title",
+  "status",
+  "section_break_dates",
+  "issue_date",
+  "due_date",
+  "column_break_dates",
+  "return_date",
+  "section_break_fine",
+  "fine_amount",
+  "fine_paid"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Série",
+   "options": "BE-LIBT-.YYYY.-"
+  },
+  {
+   "fieldname": "membership",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Adhésion",
+   "options": "Library Membership",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "membership.student_name",
+   "fieldname": "student",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Élève",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_main",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "book_copy",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Exemplaire",
+   "options": "Library Book Copy",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "book_copy.book_title",
+   "fieldname": "book_title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Titre",
+   "read_only": 1
+  },
+  {
+   "default": "Emprunté",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Statut",
+   "options": "Emprunté\nRetourné\nEn retard\nPerdu",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_dates",
+   "fieldtype": "Section Break",
+   "label": "Dates"
+  },
+  {
+   "default": "Today",
+   "fieldname": "issue_date",
+   "fieldtype": "Date",
+   "label": "Date d'emprunt",
+   "reqd": 1
+  },
+  {
+   "description": "Calculée automatiquement à partir de la durée d'emprunt configurée (Paramètres Burkina Education).",
+   "fieldname": "due_date",
+   "fieldtype": "Date",
+   "label": "Date d'échéance",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_dates",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "return_date",
+   "fieldtype": "Date",
+   "label": "Date de retour"
+  },
+  {
+   "fieldname": "section_break_fine",
+   "fieldtype": "Section Break",
+   "label": "Pénalité de retard"
+  },
+  {
+   "fieldname": "fine_amount",
+   "fieldtype": "Currency",
+   "label": "Montant de la pénalité",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "fine_paid",
+   "fieldtype": "Check",
+   "label": "Pénalité payée"
+  }
+ ],
+ "icon": "fa fa-exchange",
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-08-13 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Library",
+ "name": "Library Transaction",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Librarian",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "book_title",
+ "track_changes": 1
+}

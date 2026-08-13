@@ -202,6 +202,10 @@ scheduler_events = {
 		# master.md §32 "Fee reminder": one reminder per overdue school-fee
 		# invoice at most every N days (docs/architecture.md section J).
 		"burkina_education.finance.notifications.run_fee_reminders",
+		# master.md §39 "notifications": flips overdue Library Transactions to
+		# "En retard" and notifies guardians once per loan (docs/architecture.md
+		# section K).
+		"burkina_education.library.notifications.run_overdue_notices",
 	],
 }
 

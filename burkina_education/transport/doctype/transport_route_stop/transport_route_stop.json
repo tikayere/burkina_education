@@ -1,0 +1,56 @@
+{
+ "actions": [],
+ "creation": "2026-08-13 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "stop_name",
+  "sequence",
+  "column_break_main",
+  "pickup_time",
+  "drop_time"
+ ],
+ "fields": [
+  {
+   "fieldname": "stop_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Arrêt",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sequence",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Ordre"
+  },
+  {
+   "fieldname": "column_break_main",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "pickup_time",
+   "fieldtype": "Time",
+   "in_list_view": 1,
+   "label": "Heure de ramassage"
+  },
+  {
+   "fieldname": "drop_time",
+   "fieldtype": "Time",
+   "in_list_view": 1,
+   "label": "Heure de dépose"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2026-08-13 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Transport",
+ "name": "Transport Route Stop",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

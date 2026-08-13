@@ -1,0 +1,141 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "naming_series:",
+ "creation": "2026-08-13 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "title",
+  "author",
+  "category",
+  "column_break_main",
+  "isbn",
+  "publisher",
+  "edition",
+  "section_break_stock",
+  "total_copies",
+  "available_copies"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Série",
+   "options": "BE-BOOK-.YYYY.-"
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Titre",
+   "reqd": 1
+  },
+  {
+   "fieldname": "author",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Auteur",
+   "options": "Library Author"
+  },
+  {
+   "fieldname": "category",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Catégorie",
+   "options": "Library Category"
+  },
+  {
+   "fieldname": "column_break_main",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "isbn",
+   "fieldtype": "Data",
+   "label": "ISBN"
+  },
+  {
+   "fieldname": "publisher",
+   "fieldtype": "Data",
+   "label": "Éditeur"
+  },
+  {
+   "fieldname": "edition",
+   "fieldtype": "Data",
+   "label": "Édition"
+  },
+  {
+   "fieldname": "section_break_stock",
+   "fieldtype": "Section Break",
+   "label": "Exemplaires"
+  },
+  {
+   "description": "Nombre total d'exemplaires (Library Book Copy) enregistrés pour ce titre.",
+   "fieldname": "total_copies",
+   "fieldtype": "Int",
+   "label": "Exemplaires totaux",
+   "read_only": 1
+  },
+  {
+   "description": "Exemplaires actuellement disponibles à l'emprunt.",
+   "fieldname": "available_copies",
+   "fieldtype": "Int",
+   "label": "Exemplaires disponibles",
+   "read_only": 1
+  }
+ ],
+ "icon": "fa fa-book",
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-08-13 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Library",
+ "name": "Library Book",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Librarian",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Student",
+   "share": 0
+  },
+  {
+   "read": 1,
+   "role": "Guardian",
+   "share": 0
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "title",
+ "track_changes": 1
+}

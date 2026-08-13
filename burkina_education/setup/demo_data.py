@@ -27,6 +27,14 @@ fan-out triggered automatically by the Phase 3 payments/Phase 2 term
 reports above (Payment Entry.on_submit / Student Term Report.on_submit,
 hooks.py) has real templates/providers to actually send through, not just
 silently skip for lack of configuration.
+Phase 5 (Operations): one Disciplinary Case and one Clinic Visit (each
+scoped to a different demo student, since Clinic access is more restricted
+than Discipline's - docs/architecture.md section K), a small Library
+catalog with copies plus one open loan, a Transport Route with a student
+assigned to a stop, the four school-relevant Asset Categories (needs the
+Phase 3 Company's chart of accounts, so this runs last), one Canteen
+Subscription with a logged meal, and one Boarding building/room/bed with a
+student checked in.
 """
 
 import frappe
@@ -149,6 +157,17 @@ def run():
 	portal_users = create_portal_users()
 	announcement = create_demo_announcement()
 
+	# Phase 5 (Operations) - runs last since Library/Transport/Canteen/
+	# Boarding fees reuse the Finance fee engine (company) and Assets needs
+	# the Company's chart of accounts (docs/architecture.md section K).
+	disciplinary_case = create_disciplinary_case_demo()
+	clinic_visit = create_clinic_visit_demo()
+	library_membership = create_library_demo()
+	transport_route = create_transport_demo()
+	asset_categories = create_asset_categories_demo(company)
+	canteen_subscription = create_canteen_demo()
+	boarding_assignment = create_boarding_demo()
+
 	frappe.db.commit()
 	return {
 		"school": school,
@@ -159,6 +178,13 @@ def run():
 		"payments": payments,
 		"portal_users": portal_users,
 		"announcement": announcement,
+		"disciplinary_case": disciplinary_case,
+		"clinic_visit": clinic_visit,
+		"library_membership": library_membership,
+		"transport_route": transport_route,
+		"asset_categories": asset_categories,
+		"canteen_subscription": canteen_subscription,
+		"boarding_assignment": boarding_assignment,
 	}
 
 
@@ -939,6 +965,14 @@ NOTIFICATION_TEMPLATES = [
 		"SMS",
 		"URGENT - École Pilote Burkina : {{ title }} - {{ content }}",
 	),
+	(
+		"Livre en retard - SMS",
+		"Library Book Overdue",
+		"SMS",
+		"Bonjour {{ guardian_name }}, le livre « {{ book_title }} » emprunté par "
+		"{{ student_name }} devait être rendu le {{ due_date }}. Merci de le "
+		"retourner à la bibliothèque. École Pilote Burkina.",
+	),
 ]
 
 PORTAL_GUARDIAN = "Issa Ouédraogo"
@@ -1028,3 +1062,234 @@ def create_demo_announcement():
 	).insert(ignore_permissions=True)
 	doc.publish()
 	return doc.name
+
+
+# ---------------------------------------------------------------------------
+# Phase 5 (Operations): Discipline, Clinic, Library, Transport, Assets,
+# Canteen, Boarding - see docs/architecture.md section K.
+# ---------------------------------------------------------------------------
+
+DEMO_STUDENT_DISCIPLINE = "Amadou Ouédraogo"
+DEMO_STUDENT_CLINIC = "Aïcha Ouédraogo"
+
+# (title, author, category, isbn, copy count)
+LIBRARY_BOOKS = [
+	("Une si longue lettre", "Mariama Bâ", "Littérature", "978-2-7087-0264-4", 2),
+	("Les Bouts de bois de Dieu", "Ousmane Sembène", "Littérature", "978-2-253-00595-7", 1),
+	("Mathématiques 6ème", "Ministère de l'Éducation", "Manuel scolaire", None, 3),
+]
+
+TRANSPORT_ROUTE_NAME = "Ligne Centre-Ville"
+
+
+def create_disciplinary_case_demo():
+	student = frappe.db.get_value("Student", {"student_name": DEMO_STUDENT_DISCIPLINE}, "name")
+	if not student:
+		return None
+	existing = frappe.db.get_value("Disciplinary Case", {"student": student}, "name")
+	if existing:
+		return existing
+
+	case = frappe.get_doc(
+		{
+			"doctype": "Disciplinary Case",
+			"student": student,
+			"incident_type": "Retard",
+			"severity": "Mineure",
+			"description": "Arrivée 20 minutes en retard, sans justificatif.",
+			"action_taken": "Avertissement oral, information portée au carnet de correspondance.",
+		}
+	).insert(ignore_permissions=True)
+	return case.name
+
+
+def create_clinic_visit_demo():
+	student = frappe.db.get_value("Student", {"student_name": DEMO_STUDENT_CLINIC}, "name")
+	if not student:
+		return None
+	existing = frappe.db.get_value("Clinic Visit", {"student": student}, "name")
+	if existing:
+		return existing
+
+	visit = frappe.get_doc(
+		{
+			"doctype": "Clinic Visit",
+			"student": student,
+			"complaint": "Maux de tête et légère fièvre.",
+			"treatment": "Paracétamol, repos à l'infirmerie.",
+			"parent_notified": 1,
+		}
+	).insert(ignore_permissions=True)
+	return visit.name
+
+
+def create_library_demo():
+	"""Book catalog with copies, plus one active Library Membership + one
+	open loan for the demo scholarship student (exercises the borrow flow on
+	real demo data, not only in tests)."""
+	for title, author_name, category_name, isbn, copies in LIBRARY_BOOKS:
+		if not frappe.db.exists("Library Author", author_name):
+			frappe.get_doc({"doctype": "Library Author", "author_name": author_name}).insert(
+				ignore_permissions=True
+			)
+		if not frappe.db.exists("Library Category", category_name):
+			frappe.get_doc({"doctype": "Library Category", "category_name": category_name}).insert(
+				ignore_permissions=True
+			)
+
+		book_name = frappe.db.get_value("Library Book", {"title": title}, "name")
+		if not book_name:
+			book = frappe.get_doc(
+				{
+					"doctype": "Library Book",
+					"title": title,
+					"author": author_name,
+					"category": category_name,
+					"isbn": isbn,
+				}
+			).insert(ignore_permissions=True)
+			book_name = book.name
+
+		existing_copies = frappe.db.count("Library Book Copy", {"book": book_name})
+		for _i in range(existing_copies, copies):
+			frappe.get_doc({"doctype": "Library Book Copy", "book": book_name}).insert(
+				ignore_permissions=True
+			)
+
+	student = frappe.db.get_value("Student", {"student_name": SCHOLARSHIP_STUDENT}, "name")
+	if not student:
+		return None
+
+	membership_name = frappe.db.get_value("Library Membership", {"student": student}, "name")
+	if not membership_name:
+		membership = frappe.get_doc({"doctype": "Library Membership", "student": student}).insert(
+			ignore_permissions=True
+		)
+		membership_name = membership.name
+
+	has_open_loan = frappe.db.exists(
+		"Library Transaction", {"membership": membership_name, "status": ["in", ("Emprunté", "En retard")]}
+	)
+	if not has_open_loan:
+		book_name = frappe.db.get_value("Library Book", {"title": LIBRARY_BOOKS[0][0]}, "name")
+		available_copy = frappe.db.get_value(
+			"Library Book Copy", {"book": book_name, "status": "Disponible"}, "name"
+		)
+		if available_copy:
+			frappe.get_doc(
+				{
+					"doctype": "Library Transaction",
+					"membership": membership_name,
+					"book_copy": available_copy,
+				}
+			).insert(ignore_permissions=True)
+
+	return membership_name
+
+
+def create_transport_demo():
+	if not frappe.db.exists("Transport Route", TRANSPORT_ROUTE_NAME):
+		frappe.get_doc(
+			{
+				"doctype": "Transport Route",
+				"route_name": TRANSPORT_ROUTE_NAME,
+				"distance_km": 8.5,
+				"stops": [
+					{"stop_name": "Place de la Nation", "pickup_time": "06:30:00", "drop_time": "16:30:00"},
+					{"stop_name": "Marché Sankaryaré", "pickup_time": "06:45:00", "drop_time": "16:15:00"},
+				],
+			}
+		).insert(ignore_permissions=True)
+
+	student = frappe.db.get_value("Student", {"student_name": DEMO_STUDENT_DISCIPLINE}, "name")
+	if student and not frappe.db.exists("Student Transport Assignment", {"student": student}):
+		frappe.get_doc(
+			{
+				"doctype": "Student Transport Assignment",
+				"student": student,
+				"route": TRANSPORT_ROUTE_NAME,
+				"stop_name": "Place de la Nation",
+			}
+		).insert(ignore_permissions=True)
+
+	return TRANSPORT_ROUTE_NAME
+
+
+def create_asset_categories_demo(company):
+	"""Seed data only (master.md §43) - ``Asset Category.accounts`` needs a
+	real Company/chart of accounts, hence this runs after ``create_company()``
+	rather than at install time (docs/architecture.md section K, and
+	inventory/setup.py's own docstring)."""
+	from burkina_education.inventory.setup import seed_asset_categories
+
+	if not company:
+		return []
+	return seed_asset_categories(company)
+
+
+def create_canteen_demo():
+	plan_name = "Formule Complète"
+	if not frappe.db.exists("Meal Plan", plan_name):
+		frappe.get_doc(
+			{
+				"doctype": "Meal Plan",
+				"plan_name": plan_name,
+				"price_per_month": 20000,
+				"description": "Petit-déjeuner, déjeuner et goûter, du lundi au vendredi.",
+			}
+		).insert(ignore_permissions=True)
+
+	student = frappe.db.get_value("Student", {"student_name": SCHOLARSHIP_STUDENT}, "name")
+	if not student:
+		return None
+
+	subscription_name = frappe.db.get_value("Canteen Subscription", {"student": student}, "name")
+	if not subscription_name:
+		subscription = frappe.get_doc(
+			{"doctype": "Canteen Subscription", "student": student, "meal_plan": plan_name}
+		).insert(ignore_permissions=True)
+		subscription_name = subscription.name
+
+	if not frappe.db.exists("Meal Consumption", {"subscription": subscription_name}):
+		frappe.get_doc(
+			{"doctype": "Meal Consumption", "subscription": subscription_name}
+		).insert(ignore_permissions=True)
+
+	return subscription_name
+
+
+def create_boarding_demo():
+	building_name = "Internat Filles"
+	if not frappe.db.exists("Boarding Building", building_name):
+		frappe.get_doc({"doctype": "Boarding Building", "building_name": building_name}).insert(
+			ignore_permissions=True
+		)
+
+	room_name = f"{building_name}-101"
+	if not frappe.db.exists("Boarding Room", room_name):
+		frappe.get_doc(
+			{
+				"doctype": "Boarding Room",
+				"building": building_name,
+				"room_number": "101",
+				"capacity": 4,
+			}
+		).insert(ignore_permissions=True)
+
+	bed_name = f"{room_name}-A"
+	if not frappe.db.exists("Boarding Bed", bed_name):
+		frappe.get_doc({"doctype": "Boarding Bed", "room": room_name, "bed_number": "A"}).insert(
+			ignore_permissions=True
+		)
+
+	student = frappe.db.get_value("Student", {"student_name": DEMO_STUDENT_CLINIC}, "name")
+	if not student:
+		return None
+	existing = frappe.db.get_value("Student Boarding Assignment", {"student": student}, "name")
+	if existing:
+		return existing
+
+	assignment = frappe.get_doc(
+		{"doctype": "Student Boarding Assignment", "student": student, "bed": bed_name}
+	).insert(ignore_permissions=True)
+	return assignment.name

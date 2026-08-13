@@ -1,0 +1,182 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "naming_series:",
+ "creation": "2026-08-12 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "student",
+  "student_name",
+  "date",
+  "column_break_main",
+  "attended_by",
+  "status",
+  "section_break_consultation",
+  "complaint",
+  "treatment",
+  "referral",
+  "referral_details",
+  "section_break_followup",
+  "parent_notified",
+  "parent_notified_on",
+  "follow_up"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Série",
+   "options": "BE-CLN-.YYYY.-"
+  },
+  {
+   "fieldname": "student",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Élève",
+   "options": "Student",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "student.student_name",
+   "fieldname": "student_name",
+   "fieldtype": "Data",
+   "label": "Nom de l'élève",
+   "read_only": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "date",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_main",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "attended_by",
+   "fieldtype": "Link",
+   "label": "Reçu par",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "default": "Ouvert",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Statut",
+   "options": "Ouvert\nSuivi requis\nClos",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_consultation",
+   "fieldtype": "Section Break",
+   "label": "Consultation"
+  },
+  {
+   "fieldname": "complaint",
+   "fieldtype": "Small Text",
+   "label": "Motif / plainte",
+   "reqd": 1
+  },
+  {
+   "fieldname": "treatment",
+   "fieldtype": "Small Text",
+   "label": "Traitement administré"
+  },
+  {
+   "default": "Aucun",
+   "fieldname": "referral",
+   "fieldtype": "Select",
+   "label": "Orientation",
+   "options": "Aucun\nMédecin\nHôpital\nPharmacie"
+  },
+  {
+   "depends_on": "eval:doc.referral && doc.referral !== \"Aucun\"",
+   "fieldname": "referral_details",
+   "fieldtype": "Small Text",
+   "label": "Détails de l'orientation"
+  },
+  {
+   "fieldname": "section_break_followup",
+   "fieldtype": "Section Break",
+   "label": "Suivi"
+  },
+  {
+   "default": "0",
+   "fieldname": "parent_notified",
+   "fieldtype": "Check",
+   "label": "Parent notifié"
+  },
+  {
+   "depends_on": "parent_notified",
+   "fieldname": "parent_notified_on",
+   "fieldtype": "Date",
+   "label": "Notifié le"
+  },
+  {
+   "fieldname": "follow_up",
+   "fieldtype": "Small Text",
+   "label": "Suivi"
+  }
+ ],
+ "icon": "fa fa-medkit",
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-08-12 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Clinic",
+ "name": "Clinic Visit",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "School Director",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Clinic Staff",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "student_name",
+ "track_changes": 1
+}

@@ -23,7 +23,11 @@
   "section_break_finance",
   "sibling_discount_rules",
   "section_break_communication",
-  "fee_reminder_interval_days"
+  "fee_reminder_interval_days",
+  "section_break_library",
+  "library_loan_period_days",
+  "column_break_library",
+  "library_fine_per_day"
  ],
  "fields": [
   {
@@ -141,6 +145,29 @@
    "fieldname": "fee_reminder_interval_days",
    "fieldtype": "Int",
    "label": "Intervalle entre rappels de frais (jours)"
+  },
+  {
+   "fieldname": "section_break_library",
+   "fieldtype": "Section Break",
+   "label": "Bibliothèque"
+  },
+  {
+   "default": "14",
+   "description": "Durée maximale d'emprunt d'un livre (voir library.loans).",
+   "fieldname": "library_loan_period_days",
+   "fieldtype": "Int",
+   "label": "Durée d'emprunt (jours)"
+  },
+  {
+   "fieldname": "column_break_library",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "25",
+   "description": "Pénalité appliquée par jour de retard au-delà de la date d'échéance.",
+   "fieldname": "library_fine_per_day",
+   "fieldtype": "Currency",
+   "label": "Pénalité de retard (par jour)"
   }
  ],
  "icon": "fa fa-cog",

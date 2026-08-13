@@ -8,3 +8,9 @@ Guardian
 Admissions
 Messaging
 Settings
+Discipline
+Clinic
+Library
+Transport
+Canteen
+Boarding

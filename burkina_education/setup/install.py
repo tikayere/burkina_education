@@ -66,6 +66,19 @@ def after_install():
 	ensure_default_price_lists()
 	ensure_default_settings()
 
+	# Discipline/Clinic/Library/Transport/Canteen/Boarding DocTypes are all
+	# ours (Phase 5) - their role grants live directly in each DocType's own
+	# JSON permissions table (the pattern already used for Scholarship etc.),
+	# not here. Only the ERPNext Assets doctypes below need the
+	# add_permission/Custom DocPerm mechanism, since we don't own them.
+	# seed_asset_categories() is NOT called here - it needs a real Company
+	# (Asset Category.accounts is mandatory), which doesn't exist until demo
+	# data creates one (setup/demo_data.py::create_asset_categories_demo()).
+	from burkina_education.inventory.setup import create_asset_custom_fields, create_asset_permissions
+
+	create_asset_custom_fields()
+	create_asset_permissions()
+
 
 def create_property_setters():
 	"""Alter behavior of Education's own fields without touching its source
@@ -329,11 +342,25 @@ def ensure_stock_uom_default():
 
 
 def ensure_default_settings():
+	"""A Single doctype's ``"default"`` in its JSON only ever gets written to
+	``tabSingles`` the moment the field is first added while the Single has
+	no row yet - a field added later via ``reload-doctype`` on an
+	already-installed site (like Phase 5's ``library_loan_period_days``/
+	``library_fine_per_day``) leaves that row missing, and
+	``get_single_value`` then returns ``None``, not the JSON default (the
+	same class of environment-bootstrap gap as Phase 3's ``Item.stock_uom``
+	default - see docs/installation.md's quirks list). Filled in explicitly
+	here rather than relied on implicitly.
+	"""
 	settings = frappe.get_single("Burkina Education Settings")
 	if not settings.default_currency:
 		settings.default_currency = "XOF"
 	if not settings.default_language:
 		settings.default_language = "fr"
+	if not settings.library_loan_period_days:
+		settings.library_loan_period_days = 14
+	if not settings.library_fine_per_day:
+		settings.library_fine_per_day = 25
 	settings.save(ignore_permissions=True)
 
 

@@ -33,7 +33,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Événement",
-   "options": "Absence Notification\nPayment Confirmation\nFee Reminder\nResult Available\nSchool Announcement\nEmergency Message\nParent Meeting\nTimetable Change\nOther",
+   "options": "Absence Notification\nPayment Confirmation\nFee Reminder\nResult Available\nSchool Announcement\nEmergency Message\nParent Meeting\nTimetable Change\nLibrary Book Overdue\nOther",
    "reqd": 1
   },
   {
