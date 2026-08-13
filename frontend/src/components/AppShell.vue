@@ -41,14 +41,15 @@
 
 <script setup>
 import { computed, ref } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { Avatar, Dropdown, FeatherIcon, call } from "frappe-ui";
-import { session, portalLabel, PORTAL_LABELS, switchPortal } from "@/session";
+import { session, PORTAL_LABELS, setHomePortal } from "@/session";
 import PortalSidebar from "@/components/PortalSidebar.vue";
 
 const route = useRoute();
+const router = useRouter();
 const mobileNavOpen = ref(false);
-const pageTitle = computed(() => route.meta?.title || portalLabel.value);
+const pageTitle = computed(() => route.meta?.title || PORTAL_LABELS[route.meta?.portal || session.homePortal]);
 
 async function logout() {
 	// frappe.whitelist(methods=["POST"]) - a plain navigation (GET) 404s/403s,
@@ -58,13 +59,15 @@ async function logout() {
 }
 
 // A user holding more than one portal Role (e.g. a Guardian who's also a
-// Secretary) gets a "changer d'espace" entry per other portal they can
-// reach - single-role users (the common case) just don't see it.
+// Secretary) already sees every portal's section in the sidebar
+// (PortalSidebar.vue) - this menu only lets them change which one opens by
+// default on the bare "/" the next time they land here, it is not an
+// access gate. Single-role users (the common case) just don't see it.
 const otherPortals = computed(() =>
-	session.availablePortals.filter((p) => p !== session.portal).map((p) => ({
-		label: PORTAL_LABELS[p],
-		icon: "repeat",
-		onClick: () => switchPortal(p),
+	session.availablePortals.filter((p) => p !== session.homePortal).map((p) => ({
+		label: `Ouvrir par défaut : ${PORTAL_LABELS[p]}`,
+		icon: "star",
+		onClick: () => setHomePortal(p, router),
 	}))
 );
 

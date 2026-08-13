@@ -93,8 +93,10 @@ role_home_page = {
 	"Registrar": "portal",
 	"Academic Director": "portal",
 	"Examination Coordinator": "portal",
+	"Department Head": "portal",
 	"Secretary": "portal",
 	"School Director": "portal",
+	"Receptionist": "portal",
 }
 
 # Vue 3 + frappe-ui SPA (frontend/) - one build serving all three portals.

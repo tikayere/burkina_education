@@ -8,12 +8,12 @@
 			/>
 			<div>
 				<p class="text-sm font-semibold leading-tight text-gray-900">Burkina Éducation</p>
-				<p class="text-xs leading-tight text-gray-500">{{ portalLabel }}</p>
+				<p class="text-xs leading-tight text-gray-500">{{ activePortalLabel }}</p>
 			</div>
 		</div>
 
 		<router-link
-			v-if="session.portal === 'guardian' && route.params.student"
+			v-if="activePortal === 'guardian' && route.params.student"
 			:to="{ name: 'guardian-dashboard' }"
 			class="mx-3 mt-3 flex items-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium text-gray-500 hover:bg-gray-100"
 			@click="$emit('navigate')"
@@ -22,18 +22,29 @@
 			Mes enfants
 		</router-link>
 
-		<nav class="flex-1 space-y-0.5 overflow-y-auto px-3 py-3">
-			<router-link
-				v-for="item in navItems"
-				:key="item.label"
-				:to="item.to"
-				class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-				active-class="!bg-bf-red-50 !text-bf-red-600"
-				@click="$emit('navigate')"
-			>
-				<FeatherIcon :name="item.icon" class="h-4 w-4" />
-				{{ item.label }}
-			</router-link>
+		<nav class="flex-1 space-y-4 overflow-y-auto px-3 py-3">
+			<!-- Single-role users (the common case) get a flat list, exactly as
+			     before. A user holding several portal Roles gets one labelled
+			     section per role instead, so every one of them stays reachable
+			     without switching "spaces" (docs/architecture.md section N). -->
+			<div v-for="section in navSections" :key="section.portal">
+				<p v-if="navSections.length > 1" class="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+					{{ section.label }}
+				</p>
+				<div class="space-y-0.5">
+					<router-link
+						v-for="item in section.items"
+						:key="item.label"
+						:to="item.to"
+						class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+						active-class="!bg-bf-red-50 !text-bf-red-600"
+						@click="$emit('navigate')"
+					>
+						<FeatherIcon :name="item.icon" class="h-4 w-4" />
+						{{ item.label }}
+					</router-link>
+				</div>
+			</div>
 		</nav>
 
 		<div class="border-t border-gray-100 px-5 py-3 text-xs text-gray-400">École Pilote Burkina</div>
@@ -44,7 +55,7 @@
 import { computed } from "vue";
 import { useRoute } from "vue-router";
 import { FeatherIcon } from "frappe-ui";
-import { session, portalLabel } from "@/session";
+import { session, PORTAL_LABELS } from "@/session";
 import {
 	studentNav,
 	guardianNav,
@@ -59,11 +70,19 @@ import {
 	academicNav,
 	commsNav,
 	leadershipNav,
+	frontdeskNav,
 } from "@/navigation";
 
 defineEmits(["navigate"]);
 const route = useRoute();
 const logoUrl = "/assets/burkina_education/images/logo.svg";
+
+// Which portal the *current page* belongs to - every route is tagged with
+// its owning portal at router-build time (router.js::tagPortal), so this
+// works the same whether that portal happens to be mounted at the root or
+// nested under "/<portal>".
+const activePortal = computed(() => route.meta?.portal || session.homePortal);
+const activePortalLabel = computed(() => PORTAL_LABELS[activePortal.value] || "");
 
 // Academic portal nav is role-aware (Registrar/Examination Coordinator only
 // see their own slice, Academic Director sees everything - see
@@ -74,13 +93,14 @@ const academicFlags = computed(() => ({
 	isDirector: session.roles.includes("Academic Director"),
 	hasStructure: session.roles.includes("Academic Director") || session.roles.includes("Registrar"),
 	hasExams: session.roles.includes("Academic Director") || session.roles.includes("Examination Coordinator"),
+	hasPedagogy: session.roles.includes("Academic Director") || session.roles.includes("Department Head"),
 }));
 
-const navItems = computed(() => {
-	if (session.portal === "guardian" && route.params.student) {
+function navItemsForPortal(portal) {
+	if (portal === "guardian" && activePortal.value === "guardian" && route.params.student) {
 		return childNav(route.params.student);
 	}
-	switch (session.portal) {
+	switch (portal) {
 		case "guardian":
 			return guardianNav;
 		case "teacher":
@@ -103,8 +123,25 @@ const navItems = computed(() => {
 			return commsNav;
 		case "leadership":
 			return leadershipNav;
+		case "frontdesk":
+			return frontdeskNav;
 		default:
 			return studentNav;
 	}
+}
+
+// Home portal's section always listed first (matches the priority order the
+// bare "/" is chosen from - session.js), every other held portal follows in
+// the same order as session.availablePortals.
+const navSections = computed(() => {
+	const ordered = [
+		session.homePortal,
+		...session.availablePortals.filter((p) => p !== session.homePortal),
+	].filter(Boolean);
+	return ordered.map((portal) => ({
+		portal,
+		label: PORTAL_LABELS[portal] || portal,
+		items: navItemsForPortal(portal),
+	}));
 });
 </script>

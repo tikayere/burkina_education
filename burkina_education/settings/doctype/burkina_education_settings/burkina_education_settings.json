@@ -4,6 +4,7 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "setup_wizard_completed",
   "default_school",
   "default_currency",
   "default_language",
@@ -30,6 +31,13 @@
   "library_fine_per_day"
  ],
  "fields": [
+  {
+   "description": "Coché automatiquement une fois l'Assistant de configuration de l'école terminé (voir settings/page/school_setup_wizard). Peut être décoché pour repasser l'assistant, aucune donnée n'est perdue.",
+   "fieldname": "setup_wizard_completed",
+   "fieldtype": "Check",
+   "label": "Configuration initiale terminée",
+   "read_only": 1
+  },
   {
    "fieldname": "default_school",
    "fieldtype": "Link",

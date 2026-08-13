@@ -94,6 +94,7 @@
    "role": "Instructor"
   }
  ],
+ "show_title_field_in_link": 1,
  "sort_field": "sequence",
  "sort_order": "ASC",
  "states": [],

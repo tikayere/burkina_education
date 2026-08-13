@@ -159,10 +159,11 @@
   {
    "read": 1,
    "report": 1,
-   "write": 1,
-   "role": "Class Teacher"
+   "role": "Class Teacher",
+   "write": 1
   }
  ],
+ "show_title_field_in_link": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

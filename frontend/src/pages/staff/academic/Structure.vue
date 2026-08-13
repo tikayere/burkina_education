@@ -23,7 +23,8 @@
 			empty-title="Aucun cycle"
 			new-button-label="Nouveau cycle"
 			search-field="cycle_name"
-			:columns="[{ fieldname: 'cycle_name', label: 'Nom', emphasize: true }, { fieldname: 'education_level', label: 'Niveau' }]"
+			:list-fields="['name', 'cycle_name', 'education_level.education_level_name']"
+			:columns="[{ fieldname: 'cycle_name', label: 'Nom', emphasize: true }, { fieldname: 'education_level_name', label: 'Niveau' }]"
 			:form-fields="cycleFields"
 		/>
 		<ResourceListPage
@@ -47,7 +48,8 @@
 			empty-title="Aucune classe"
 			new-button-label="Nouvelle classe"
 			search-field="grade_name"
-			:columns="[{ fieldname: 'grade_name', label: 'Nom', emphasize: true }, { fieldname: 'cycle', label: 'Cycle' }, { fieldname: 'stream', label: 'Filière' }]"
+			:list-fields="['name', 'grade_name', 'cycle.cycle_name', 'stream']"
+			:columns="[{ fieldname: 'grade_name', label: 'Nom', emphasize: true }, { fieldname: 'cycle_name', label: 'Cycle' }, { fieldname: 'stream', label: 'Filière' }]"
 			:form-fields="gradeFields"
 		/>
 	</div>

@@ -1,4 +1,4 @@
-import { computed, reactive } from "vue";
+import { reactive } from "vue";
 
 // Populated server-side by www/portal.py::get_context() -> context.boot, and
 // flattened onto `window` by frappe-ui's vite "jinjaBootData" plugin
@@ -16,9 +16,11 @@ const boot = {
 
 // One entry per Role this app has a portal for - mirrors (by hand, see that
 // module's own docstring) portal/roles/__init__.py::ROLE_PORTAL on the
-// backend. Order here is priority order: a user holding more than one of
-// these roles lands on the first match, but every match they hold is still
-// offered in the "changer d'espace" switcher (AppShell.vue).
+// backend. Order here is priority order: it decides which portal owns the
+// bare "/" path (see router.js) when a user holds more than one - every
+// portal a user holds is mounted and reachable from the sidebar regardless
+// of this order (docs/architecture.md section M/N: a multi-role user gets
+// the union of every role's information, not just one at a time).
 const ROLE_PORTAL = [
 	["Guardian", "guardian"],
 	["Student", "student"],
@@ -27,6 +29,7 @@ const ROLE_PORTAL = [
 	["Academic Director", "academic"],
 	["Examination Coordinator", "academic"],
 	["Registrar", "academic"],
+	["Department Head", "academic"],
 	["Accountant", "finance"],
 	["Librarian", "librarian"],
 	["Transport Manager", "transport"],
@@ -34,6 +37,7 @@ const ROLE_PORTAL = [
 	["Boarding Manager", "boarding"],
 	["Clinic Staff", "clinic"],
 	["Secretary", "comms"],
+	["Receptionist", "frontdesk"],
 ];
 
 export const PORTAL_LABELS = {
@@ -49,6 +53,7 @@ export const PORTAL_LABELS = {
 	academic: "Espace Scolarité",
 	comms: "Espace Communication",
 	leadership: "Tableau de bord Direction",
+	frontdesk: "Espace Accueil",
 };
 
 function resolveAvailablePortals(roles) {
@@ -63,33 +68,38 @@ function resolveAvailablePortals(roles) {
 	return portals;
 }
 
-const STORAGE_KEY = "burkina-education:portal";
+const STORAGE_KEY = "burkina-education:home-portal";
 
-function resolvePortal(roles) {
-	const available = resolveAvailablePortals(roles);
+// Which portal owns the bare "/" path (router.js) - purely a landing-page
+// preference, not an access boundary. A user holding several portal Roles
+// (e.g. a Guardian who's also a Secretary) can always reach every one of
+// them from the sidebar (PortalSidebar.vue); this only decides which one
+// they see first when opening "/portal" itself.
+function resolveHomePortal(available) {
 	if (!available.length) return null;
-
-	// A user with more than one portal (rare - e.g. a Guardian who's also
-	// staff) keeps whichever they last chose (AppShell.vue's "changer
-	// d'espace" switcher writes this), falling back to priority order the
-	// very first time.
 	const remembered = window.localStorage?.getItem(STORAGE_KEY);
 	if (remembered && available.includes(remembered)) return remembered;
 	return available[0];
 }
 
+const availablePortals = resolveAvailablePortals(boot.roles);
+
 export const session = reactive({
 	...boot,
 	isGuest: boot.user === "Guest",
-	availablePortals: resolveAvailablePortals(boot.roles),
-	portal: resolvePortal(boot.roles),
+	availablePortals,
+	homePortal: resolveHomePortal(availablePortals),
 	isClassTeacher: boot.roles.includes("Class Teacher"),
 });
 
-export function switchPortal(portal) {
+// Persists which portal should own "/" on the *next* load (route
+// registration happens once, at router creation - see router.js) and
+// immediately navigates there via the named "<portal>-dashboard" route,
+// which resolves correctly whether that portal is mounted at the root or
+// nested under "/<portal>" (AppShell.vue's user menu is the only caller).
+export function setHomePortal(portal, router) {
 	if (!session.availablePortals.includes(portal)) return;
 	window.localStorage?.setItem(STORAGE_KEY, portal);
-	window.location.href = "/portal";
+	session.homePortal = portal;
+	router?.push({ name: `${portal}-dashboard` });
 }
-
-export const portalLabel = computed(() => PORTAL_LABELS[session.portal] || "");

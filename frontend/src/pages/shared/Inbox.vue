@@ -17,15 +17,20 @@
 </template>
 
 <script setup>
+import { useRoute } from "vue-router";
 import { LoadingIndicator } from "frappe-ui";
 import { studentApi, guardianApi } from "@/api";
-import { session } from "@/session";
 import { useAsync } from "@/composables/useAsync";
 import { formatDateTime } from "@/utils/format";
 import SectionCard from "@/components/SectionCard.vue";
 import EmptyState from "@/components/EmptyState.vue";
 
-const fetcher = session.portal === "guardian" ? () => guardianApi.inbox({ limit: 50 }) : () => studentApi.inbox({ limit: 50 });
+// Shared by both "student-messages" and "guardian-messages" (router.js) - a
+// multi-role user can hold both at once, so which API to call has to come
+// from *this route*, not a global "current portal" (docs/architecture.md
+// section N).
+const route = useRoute();
+const fetcher = route.meta?.portal === "guardian" ? () => guardianApi.inbox({ limit: 50 }) : () => studentApi.inbox({ limit: 50 });
 const { data, loading } = useAsync(fetcher, { initial: [] });
 
 const LABELS = {

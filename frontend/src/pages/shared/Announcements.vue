@@ -20,15 +20,20 @@
 </template>
 
 <script setup>
+import { useRoute } from "vue-router";
 import { LoadingIndicator } from "frappe-ui";
 import { studentApi, teacherApi } from "@/api";
-import { session } from "@/session";
 import { useAsync } from "@/composables/useAsync";
 import { formatDate } from "@/utils/format";
 import SectionCard from "@/components/SectionCard.vue";
 import EmptyState from "@/components/EmptyState.vue";
 import StatusBadge from "@/components/StatusBadge.vue";
 
-const fetcher = session.portal === "teacher" ? () => teacherApi.announcements({ limit: 30 }) : () => studentApi.announcements({ limit: 30 });
+// Shared by both "student-announcements" and "teacher-announcements"
+// (router.js) - which API to call has to come from *this route*, not a
+// global "current portal", since a multi-role user can hold both at once
+// (docs/architecture.md section N).
+const route = useRoute();
+const fetcher = route.meta?.portal === "teacher" ? () => teacherApi.announcements({ limit: 30 }) : () => studentApi.announcements({ limit: 30 });
 const { data, loading } = useAsync(fetcher, { initial: [] });
 </script>

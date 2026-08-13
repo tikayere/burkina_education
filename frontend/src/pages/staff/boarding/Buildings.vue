@@ -11,6 +11,7 @@
 			empty-title="Aucun bâtiment"
 			new-button-label="Nouveau bâtiment"
 			search-field="building_name"
+			:list-fields="buildingListFields"
 			:columns="buildingColumns"
 			:form-fields="buildingFields"
 		/>
@@ -51,9 +52,12 @@ const tabs = [
 ];
 const tab = ref("buildings");
 
+// Employee autonames to an opaque naming series (docs/architecture.md) -
+// dotted-link-join so the table shows the supervisor's real name.
+const buildingListFields = ["name", "building_name", "supervisor.employee_name as supervisor_name"];
 const buildingColumns = [
 	{ fieldname: "building_name", label: "Nom", emphasize: true },
-	{ fieldname: "supervisor", label: "Surveillant" },
+	{ fieldname: "supervisor_name", label: "Surveillant" },
 ];
 const buildingFields = [
 	{ fieldname: "building_name", label: "Nom du bâtiment", type: "Data", required: true },

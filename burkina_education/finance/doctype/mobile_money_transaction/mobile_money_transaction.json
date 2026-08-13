@@ -13,6 +13,7 @@
   "reference_doctype",
   "reference_name",
   "student",
+  "student_name",
   "section_break_amount",
   "phone_number",
   "amount",
@@ -79,6 +80,13 @@
    "fieldtype": "Link",
    "label": "Élève",
    "options": "Student"
+  },
+  {
+   "fetch_from": "student.student_name",
+   "fieldname": "student_name",
+   "fieldtype": "Data",
+   "label": "Nom de l'élève",
+   "read_only": 1
   },
   {
    "fieldname": "section_break_amount",
@@ -195,8 +203,10 @@
    "write": 1
   }
  ],
+ "show_title_field_in_link": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
+ "title_field": "student_name",
  "track_changes": 1
 }

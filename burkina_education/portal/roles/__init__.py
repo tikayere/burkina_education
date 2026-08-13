@@ -44,8 +44,13 @@ ROLE_PORTAL = {
 	"Registrar": "academic",
 	"Academic Director": "academic",
 	"Examination Coordinator": "academic",
+	"Department Head": "academic",
 	"Secretary": "comms",
 	"School Director": "leadership",
+	# Front-desk directory lookup only (Student/Guardian, read-only) - see
+	# setup/install.py::create_receptionist_permissions and
+	# docs/architecture.md section N.
+	"Receptionist": "frontdesk",
 }
 
 STAFF_ROLES = list(ROLE_PORTAL.keys())

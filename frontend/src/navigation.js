@@ -96,14 +96,17 @@ export const financeNav = [
 	{ label: "Bourses", icon: "award", to: { name: "finance-scholarships" } },
 ];
 
-export function academicNav({ hasStructure, hasExams, isDirector }) {
+export function academicNav({ hasStructure, hasExams, hasPedagogy, isDirector }) {
 	return [
 		{ label: "Tableau de bord", icon: "home", to: { name: "academic-dashboard" } },
 		...(hasStructure ? [{ label: "Structure scolaire", icon: "layers", to: { name: "academic-structure" } }] : []),
 		...(hasExams ? [{ label: "Examens", icon: "clipboard", to: { name: "academic-exams" } }] : []),
+		// Department Head gets Pédagogie on its own (curriculum authoring,
+		// same rights as Instructor); Discipline/Bourses/Annonces stay
+		// Academic Director-only administrative tools.
+		...(hasPedagogy ? [{ label: "Pédagogie", icon: "book", to: { name: "academic-pedagogy" } }] : []),
 		...(isDirector
 			? [
-					{ label: "Pédagogie", icon: "book", to: { name: "academic-pedagogy" } },
 					{ label: "Discipline", icon: "shield", to: { name: "academic-discipline" } },
 					{ label: "Bourses", icon: "award", to: { name: "academic-scholarships" } },
 					{ label: "Annonces", icon: "bell", to: { name: "academic-announcements" } },
@@ -121,4 +124,8 @@ export const commsNav = [
 export const leadershipNav = [
 	{ label: "Tableau de bord", icon: "home", to: { name: "leadership-dashboard" } },
 	{ label: "Discipline", icon: "shield", to: { name: "leadership-discipline" } },
+];
+
+export const frontdeskNav = [
+	{ label: "Accueil", icon: "home", to: { name: "frontdesk-dashboard" } },
 ];

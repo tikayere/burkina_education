@@ -24,6 +24,7 @@
 			empty-title="Aucune programmation"
 			new-button-label="Nouvelle programmation"
 			order-by="exam_date desc"
+			:list-fields="scheduleListFields"
 			:columns="scheduleColumns"
 			:form-fields="scheduleFields"
 		/>
@@ -60,12 +61,27 @@ const examFields = [
 	{ fieldname: "description", label: "Description", type: "Small Text" },
 ];
 
+// Examination Schedule/Grade/Room all autoname to an opaque id (see each
+// doctype's own docs/architecture.md entry) - "<link>.<name_field>" is
+// Frappe's dotted-link-join syntax (frappe.client.get_list auto-joins and
+// returns the value under the trailing key), so the table shows real names
+// instead of raw ids. Course keeps its plain fieldname: Course already
+// autonames to its own course_name, so the raw id is already readable.
+const scheduleListFields = [
+	"name",
+	"examination.examination_name",
+	"grade.grade_name",
+	"course",
+	"exam_date",
+	"room.room_name",
+	"status",
+];
 const scheduleColumns = [
-	{ fieldname: "examination", label: "Examen", emphasize: true },
-	{ fieldname: "grade", label: "Classe" },
+	{ fieldname: "examination_name", label: "Examen", emphasize: true },
+	{ fieldname: "grade_name", label: "Classe" },
 	{ fieldname: "course", label: "Matière" },
 	{ fieldname: "exam_date", label: "Date", format: "date" },
-	{ fieldname: "room", label: "Salle" },
+	{ fieldname: "room_name", label: "Salle" },
 	{ fieldname: "status", label: "Statut", format: "badge", tone: (r) => (r.status === "Completed" ? "green" : r.status === "Cancelled" ? "red" : "gold") },
 ];
 const scheduleFields = [

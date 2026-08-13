@@ -1,0 +1,24 @@
+{
+ "creation": "2026-08-13 00:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Page",
+ "icon": "fa fa-magic",
+ "idx": 0,
+ "modified": "2026-08-13 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Settings",
+ "name": "school-setup-wizard",
+ "owner": "Administrator",
+ "page_name": "school-setup-wizard",
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "School Director"
+  }
+ ],
+ "standard": "Yes",
+ "system_page": 0,
+ "title": "Assistant de configuration de l'école"
+}

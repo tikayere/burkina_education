@@ -140,6 +140,10 @@ const leadershipRoutes = [
 	{ path: "/discipline", name: "leadership-discipline", component: () => import("@/pages/staff/academic/Discipline.vue"), meta: { title: "Discipline" } },
 ];
 
+const frontdeskRoutes = [
+	{ path: "/", name: "frontdesk-dashboard", component: () => import("@/pages/staff/frontdesk/Dashboard.vue"), meta: { title: "Accueil" } },
+];
+
 const ROUTES_BY_PORTAL = {
 	guardian: guardianRoutes,
 	teacher: teacherRoutes,
@@ -153,22 +157,68 @@ const ROUTES_BY_PORTAL = {
 	academic: academicRoutes,
 	comms: commsRoutes,
 	leadership: leadershipRoutes,
+	frontdesk: frontdeskRoutes,
 };
 
-function routesForRole() {
-	return ROUTES_BY_PORTAL[session.portal] || [];
+// A user holding more than one portal Role (e.g. a Guardian who's also a
+// Secretary) must have every one of them available at once, not just the
+// first match behind a "switch and reload" gate - so every portal the user
+// holds is mounted in the same router, all the time. Route *names* are
+// already globally unique across ROUTES_BY_PORTAL (each portal prefixes its
+// own), so merging never collides there; only *paths* need namespacing,
+// since several portals reuse plain paths like "/annonces".
+//
+// `session.homePortal` (session.js) just picks which one is unprefixed, at
+// the bare "/" - a landing-page preference, not an access boundary. Every
+// other held portal is nested under "/<portal-key>/..." instead. Because
+// every sidebar/nav link (navigation.js) points at a route by *name*
+// (`{ name: "teacher-dashboard" }`), not by hand-built path, this nesting is
+// invisible to the rest of the app - `router.push`/`<router-link>` resolve
+// the right URL either way.
+function tagPortal(routes, portal) {
+	return routes.map((route) => ({ ...route, meta: { ...route.meta, portal } }));
+}
+
+function nestedUnderPrefix(routes, portal) {
+	// Child route paths are relative to their parent unless they start with
+	// "/", in which case Vue Router treats them as absolute and the parent
+	// prefix below is silently ignored - so the leading "/" every route in
+	// ROUTES_BY_PORTAL carries (written assuming it would sit at the root)
+	// has to come off first. "/" itself becomes "" (the prefix's own index).
+	return tagPortal(routes, portal).map((route) => ({ ...route, path: route.path.replace(/^\//, "") }));
+}
+
+function buildPortalRoutes() {
+	const { availablePortals, homePortal } = session;
+	const children = [];
+	if (homePortal && ROUTES_BY_PORTAL[homePortal]) {
+		children.push(...tagPortal(ROUTES_BY_PORTAL[homePortal], homePortal));
+	}
+	for (const portal of availablePortals) {
+		if (portal === homePortal || !ROUTES_BY_PORTAL[portal]) continue;
+		children.push({
+			path: `/${portal}`,
+			// No component of its own - a path-prefix grouping only; its
+			// children render straight into AppShell's <router-view>
+			// (Vue Router 4 supports pathless parent routes for this).
+			children: nestedUnderPrefix(ROUTES_BY_PORTAL[portal], portal),
+		});
+	}
+	return children;
 }
 
 const AppShell = () => import("@/components/AppShell.vue");
 const NotAuthorized = () => import("@/pages/NotAuthorized.vue");
+
+const hasAnyPortal = session.availablePortals.length > 0;
 
 export const router = createRouter({
 	history: createWebHistory("/portal"),
 	routes: [
 		{
 			path: "/",
-			component: session.portal ? AppShell : NotAuthorized,
-			children: session.portal ? routesForRole() : [],
+			component: hasAnyPortal ? AppShell : NotAuthorized,
+			children: hasAnyPortal ? buildPortalRoutes() : [],
 		},
 		{ path: "/:pathMatch(.*)*", redirect: "/" },
 	],

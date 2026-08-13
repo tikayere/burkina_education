@@ -4,6 +4,14 @@
 frappe.ui.form.on("Burkina Education Settings", {
 	refresh(frm) {
 		frm.trigger("check_duplicate_ranks");
+
+		// master.md §7 - guided first-run configuration (École, Année
+		// scolaire, Structure, Barème, Utilisateurs). Always available, not
+		// just before setup_wizard_completed - it's also how a School
+		// Director revisits/corrects any of those steps later.
+		frm.add_custom_button(__("Assistant de configuration de l'école"), () => {
+			frappe.set_route("school-setup-wizard");
+		}).addClass(frm.doc.setup_wizard_completed ? "" : "btn-primary");
 	},
 
 	sibling_discount_rules_add(frm) {

@@ -34,6 +34,14 @@
 			<StatCard label="Annonces publiées" :value="data.director.published_announcements" icon="bell" tone="gray" />
 			<StatCard label="Leçons planifiées" :value="data.director.lesson_count" icon="edit-2" tone="gray" />
 		</div>
+
+		<!-- Department Head (no "director" section) - the same three counts,
+		     scoped to just what Pédagogie covers. -->
+		<div v-else-if="data.pedagogy" class="grid grid-cols-3 gap-4">
+			<StatCard label="Curriculums" :value="data.pedagogy.curriculum_count" icon="book" tone="gray" />
+			<StatCard label="Compétences" :value="data.pedagogy.competency_count" icon="target" tone="gray" />
+			<StatCard label="Leçons planifiées" :value="data.pedagogy.lesson_count" icon="edit-2" tone="gray" />
+		</div>
 	</div>
 </template>
 

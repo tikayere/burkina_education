@@ -59,6 +59,8 @@ def after_install():
 	create_client_scripts()
 	create_finance_permissions()
 	create_portal_permissions()
+	create_department_head_permissions()
+	create_receptionist_permissions()
 	enable_xof_currency()
 	ensure_item_group_root()
 	ensure_stock_uom_default()
@@ -78,6 +80,25 @@ def after_install():
 
 	create_asset_custom_fields()
 	create_asset_permissions()
+
+
+#: Education/ERPNext DocTypes that are frequently picked from a Link field
+#: across this app (school.doctype.school.json § "most-linked" audit) and
+#: already ship a sensible ``title_field`` upstream, but not
+#: ``show_title_field_in_link`` — without it, every Link dropdown/awesomebar
+#: search result shows only the opaque autoname (e.g. "EDU-GRD-2024-00042"
+#: for a Guardian) instead of the human name next to it. Frappe's own
+#: Student/Course/Academic Year etc. don't need this (their autoname already
+#: *is* the readable field), so only the doctypes below are missing it.
+TITLE_LINK_DOCTYPES = [
+	"Guardian",
+	"Instructor",
+	"Room",
+	"Fees",
+	"Fee Structure",
+	"Employee",
+	"Driver",
+]
 
 
 def create_property_setters():
@@ -102,6 +123,10 @@ def create_property_setters():
 			"property": "track_changes",
 			"value": "1",
 		},
+	]
+	property_setters += [
+		{"doctype": dt, "fieldname": None, "property": "show_title_field_in_link", "value": "1"}
+		for dt in TITLE_LINK_DOCTYPES
 	]
 
 	for ps in property_setters:
@@ -128,7 +153,7 @@ def _set_property(doctype, fieldname, property, value):
 			frappe.db.set_value("Property Setter", rows[0].name, "value", value)
 		return
 
-	property_type = "Check" if property == "track_changes" else "Text"
+	property_type = "Check" if property in ("track_changes", "show_title_field_in_link") else "Text"
 	make_property_setter(
 		doctype,
 		fieldname,
@@ -229,6 +254,55 @@ def create_portal_permissions():
 		for role in ("Guardian", "Student"):
 			add_permission(doctype, role, 0)
 			update_permission_property(doctype, role, 0, "read", 1)
+
+
+#: Same doctypes/permission level Instructor already gets (education's own
+#: install.py) - a Department Head oversees a subject/department across
+#: several teachers, so needs the same curriculum-authoring rights as any one
+#: of them, not the full Academic Director set (no Discipline, Scholarship,
+#: School, or Settings access). Curriculum itself stays read-only (the
+#: Academic Director defines *which* curriculum applies to which
+#: grade/subject; a Department Head fills it in - competencies, units,
+#: lessons - underneath). Portal wiring: portal/roles/__init__.py,
+#: frontend/src/session.js, frontend/src/navigation.js (docs/architecture.md
+#: section N).
+DEPARTMENT_HEAD_PEDAGOGY_DOCTYPES = {
+	"Curriculum": ("read", "report"),
+	"Competency": ("read", "report", "write", "create", "print", "email"),
+	"Learning Unit": ("read", "report", "write", "create", "print", "email"),
+	"Lesson": ("read", "report", "write", "create", "print", "email"),
+	"Learning Objective": ("read", "report", "write", "create", "print", "email"),
+	# Read-only: Department Head links an existing Course into a
+	# Curriculum/Lesson, but doesn't own the Course master itself.
+	"Course": ("read", "report"),
+}
+
+
+def create_department_head_permissions():
+	from frappe.permissions import add_permission, update_permission_property
+
+	for doctype, ptypes in DEPARTMENT_HEAD_PEDAGOGY_DOCTYPES.items():
+		add_permission(doctype, "Department Head", 0)
+		for ptype in ptypes:
+			update_permission_property(doctype, "Department Head", 0, ptype, 1)
+
+
+#: A Receptionist's whole job here is answering "who is this / how do I
+#: reach their guardian" at the front desk - read-only is deliberate (they
+#: triage and redirect, they don't maintain records - master.md §54 "least
+#: privilege"). Portal wiring: portal/roles/__init__.py,
+#: frontend/src/session.js, frontend/src/navigation.js (docs/architecture.md
+#: section N).
+RECEPTIONIST_READ_ONLY_DOCTYPES = ["Student", "Guardian"]
+
+
+def create_receptionist_permissions():
+	from frappe.permissions import add_permission, update_permission_property
+
+	for doctype in RECEPTIONIST_READ_ONLY_DOCTYPES:
+		add_permission(doctype, "Receptionist", 0)
+		for ptype in ("read", "report"):
+			update_permission_property(doctype, "Receptionist", 0, ptype, 1)
 
 
 def enable_xof_currency():

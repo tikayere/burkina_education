@@ -10,7 +10,8 @@
 			icon="book"
 			empty-title="Aucun curriculum"
 			new-button-label="Nouveau curriculum"
-			:columns="[{ fieldname: 'grade', label: 'Classe', emphasize: true }, { fieldname: 'course', label: 'Matière' }, { fieldname: 'academic_year', label: 'Année' }, { fieldname: 'is_active', label: 'Actif', format: 'check' }]"
+			:list-fields="curriculumListFields"
+			:columns="curriculumColumns"
 			:form-fields="curriculumFields"
 		/>
 		<ResourceListPage
@@ -22,7 +23,8 @@
 			empty-title="Aucune compétence"
 			new-button-label="Nouvelle compétence"
 			search-field="title"
-			:columns="[{ fieldname: 'title', label: 'Titre', emphasize: true }, { fieldname: 'curriculum', label: 'Curriculum' }, { fieldname: 'code', label: 'Code' }]"
+			:list-fields="['name', 'title', 'curriculum.title as curriculum_title', 'code']"
+			:columns="[{ fieldname: 'title', label: 'Titre', emphasize: true }, { fieldname: 'curriculum_title', label: 'Curriculum' }, { fieldname: 'code', label: 'Code' }]"
 			:form-fields="competencyFields"
 		/>
 		<ResourceListPage
@@ -34,7 +36,8 @@
 			empty-title="Aucune unité"
 			new-button-label="Nouvelle unité"
 			search-field="title"
-			:columns="[{ fieldname: 'title', label: 'Titre', emphasize: true }, { fieldname: 'curriculum', label: 'Curriculum' }, { fieldname: 'estimated_hours', label: 'Heures estimées' }]"
+			:list-fields="['name', 'title', 'curriculum.title as curriculum_title', 'estimated_hours']"
+			:columns="[{ fieldname: 'title', label: 'Titre', emphasize: true }, { fieldname: 'curriculum_title', label: 'Curriculum' }, { fieldname: 'estimated_hours', label: 'Heures estimées' }]"
 			:form-fields="unitFields"
 		/>
 		<ResourceListPage
@@ -46,6 +49,7 @@
 			empty-title="Aucune leçon"
 			new-button-label="Nouvelle leçon"
 			search-field="title"
+			:list-fields="lessonListFields"
 			:columns="lessonColumns"
 			:form-fields="lessonFields"
 		/>
@@ -58,7 +62,8 @@
 			empty-title="Aucun barème"
 			new-button-label="Nouveau barème"
 			search-field="scheme_name"
-			:columns="[{ fieldname: 'scheme_name', label: 'Nom', emphasize: true }, { fieldname: 'education_level', label: 'Niveau' }, { fieldname: 'score_max', label: 'Note max.' }, { fieldname: 'is_default', label: 'Par défaut', format: 'check' }]"
+			:list-fields="['name', 'scheme_name', 'education_level.education_level_name', 'score_max', 'is_default']"
+			:columns="[{ fieldname: 'scheme_name', label: 'Nom', emphasize: true }, { fieldname: 'education_level_name', label: 'Niveau' }, { fieldname: 'score_max', label: 'Note max.' }, { fieldname: 'is_default', label: 'Par défaut', format: 'check' }]"
 			:form-fields="gradingFields"
 		/>
 		<ResourceListPage
@@ -91,6 +96,19 @@ const tabs = [
 ];
 const tab = ref("curriculum");
 
+// Grade autonames to an opaque hash (docs/architecture.md), so the table
+// joins to its "grade_name" via Frappe's dotted-link-join syntax
+// (frappe.client.get_list auto-joins Grade and returns the value under the
+// trailing key) rather than showing the raw id. Course/Academic Year both
+// already autoname to their own readable name, so they're left as-is.
+const curriculumListFields = ["name", "grade.grade_name", "course", "academic_year", "is_active"];
+const curriculumColumns = [
+	{ fieldname: "grade_name", label: "Classe", emphasize: true },
+	{ fieldname: "course", label: "Matière" },
+	{ fieldname: "academic_year", label: "Année" },
+	{ fieldname: "is_active", label: "Actif", format: "check" },
+];
+
 const curriculumFields = [
 	{ fieldname: "grade", label: "Classe", type: "Link", doctype: "Grade", searchField: "grade_name", required: true },
 	{ fieldname: "course", label: "Matière", type: "Link", doctype: "Course", searchField: "course_name", required: true },
@@ -116,9 +134,11 @@ const unitFields = [
 	{ fieldname: "description", label: "Description", type: "Small Text" },
 ];
 
+// Learning Unit also autonames to an opaque hash - same dotted-join fix.
+const lessonListFields = ["name", "title", "learning_unit.title as learning_unit_title", "planned_date", "status"];
 const lessonColumns = [
 	{ fieldname: "title", label: "Titre", emphasize: true },
-	{ fieldname: "learning_unit", label: "Unité" },
+	{ fieldname: "learning_unit_title", label: "Unité" },
 	{ fieldname: "planned_date", label: "Date prévue", format: "date" },
 	{ fieldname: "status", label: "Statut", format: "badge", tone: (r) => (r.status === "Delivered" ? "green" : r.status === "Cancelled" ? "red" : "gray") },
 ];
