@@ -37,7 +37,26 @@ __all__ = [
 	"require_group_taught_by_instructor",
 	"is_class_teacher",
 	"get_students_in_groups",
+	"require_any_role",
 ]
+
+
+def require_any_role(*roles):
+	"""Staff portals (``portal/roles/*.py``) map one-to-one onto real Frappe
+	Roles that already carry correct doctype-level permissions (Librarian,
+	Transport Manager, Accountant, ...; unlike Guardian/Student/Instructor,
+	nothing here is ownership-scoped - a Librarian sees every book, not "their
+	own"). So the check these portals need isn't re-deriving an identity, it's
+	simply: does the caller hold one of the role(s) this page is for? Kept
+	here rather than inline ``frappe.only_for`` because a portal page throwing
+	the *French* message below (consistent with every other permission error
+	in this module) is nicer than ``frappe.only_for``'s English default, and
+	Administrator/System Manager always pass (matches ``www/portal.py``'s own
+	gate, and is what lets tests/support staff exercise these pages).
+	"""
+	user_roles = set(frappe.get_roles())
+	if user_roles.isdisjoint(roles) and "System Manager" not in user_roles:
+		frappe.throw(frappe._("Vous n'avez pas accès à cet espace."), frappe.PermissionError)
 
 
 def require_student(user=None):

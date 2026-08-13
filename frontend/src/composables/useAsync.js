@@ -34,13 +34,14 @@ export function useAsync(fetcher, { watchSource = null, initial = null } = {}) {
 }
 
 export function notifySuccess(text) {
-	toast({ title: text, icon: "check-circle", iconClasses: "text-bf-green-500" });
+	// frappe-ui's `toast` is an object (toast.create/success/error/...), not
+	// a callable - calling it directly (`toast({...})`) throws instead of
+	// showing anything, which is why every success/error notification in
+	// every portal has been silently failing (see App.vue's matching fix -
+	// this needs both: the right call AND a mounted `<Toasts />` container).
+	toast.success(text);
 }
 
 export function notifyError(error, fallback = "Une erreur est survenue.") {
-	toast({
-		title: error?.messages?.[0] || error?.message || fallback,
-		icon: "alert-circle",
-		iconClasses: "text-bf-red-500",
-	});
+	toast.error(error?.messages?.[0] || error?.message || fallback);
 }

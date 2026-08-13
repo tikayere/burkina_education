@@ -43,7 +43,7 @@
 import { computed, ref } from "vue";
 import { useRoute } from "vue-router";
 import { Avatar, Dropdown, FeatherIcon, call } from "frappe-ui";
-import { session, portalLabel } from "@/session";
+import { session, portalLabel, PORTAL_LABELS, switchPortal } from "@/session";
 import PortalSidebar from "@/components/PortalSidebar.vue";
 
 const route = useRoute();
@@ -57,8 +57,20 @@ async function logout() {
 	window.location.href = "/login";
 }
 
-const userMenuOptions = [
+// A user holding more than one portal Role (e.g. a Guardian who's also a
+// Secretary) gets a "changer d'espace" entry per other portal they can
+// reach - single-role users (the common case) just don't see it.
+const otherPortals = computed(() =>
+	session.availablePortals.filter((p) => p !== session.portal).map((p) => ({
+		label: PORTAL_LABELS[p],
+		icon: "repeat",
+		onClick: () => switchPortal(p),
+	}))
+);
+
+const userMenuOptions = computed(() => [
+	...otherPortals.value,
 	{ label: "Espace Frappe (Desk)", icon: "grid", onClick: () => (window.location.href = "/app") },
 	{ label: "Se déconnecter", icon: "log-out", onClick: logout },
-];
+]);
 </script>

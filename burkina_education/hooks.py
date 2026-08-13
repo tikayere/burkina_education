@@ -74,10 +74,27 @@ web_include_css = "/assets/burkina_education/css/portal.css"
 # picks the right dashboard from frappe.boot.user.roles once loaded. This
 # superseded the Jinja www/parent, www/student pages Phase 4 originally
 # built (kept on disk, unlinked, in case they're ever wanted again).
+#
+# Section M extended the same SPA with one portal per operational staff Role
+# (Librarian, Transport Manager, ...). Kept as a plain literal (not built
+# from portal/roles/__init__.py::STAFF_ROLES) since every key here needs the
+# same "portal" value anyway - see www/portal.py, which imports STAFF_ROLES
+# for its actual permission gate.
 role_home_page = {
 	"Guardian": "portal",
 	"Student": "portal",
 	"Instructor": "portal",
+	"Librarian": "portal",
+	"Transport Manager": "portal",
+	"Canteen Manager": "portal",
+	"Boarding Manager": "portal",
+	"Clinic Staff": "portal",
+	"Accountant": "portal",
+	"Registrar": "portal",
+	"Academic Director": "portal",
+	"Examination Coordinator": "portal",
+	"Secretary": "portal",
+	"School Director": "portal",
 }
 
 # Vue 3 + frappe-ui SPA (frontend/) - one build serving all three portals.

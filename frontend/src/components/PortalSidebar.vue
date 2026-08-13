@@ -45,18 +45,66 @@ import { computed } from "vue";
 import { useRoute } from "vue-router";
 import { FeatherIcon } from "frappe-ui";
 import { session, portalLabel } from "@/session";
-import { studentNav, guardianNav, childNav, teacherNav } from "@/navigation";
+import {
+	studentNav,
+	guardianNav,
+	childNav,
+	teacherNav,
+	librarianNav,
+	transportNav,
+	canteenNav,
+	boardingNav,
+	clinicNav,
+	financeNav,
+	academicNav,
+	commsNav,
+	leadershipNav,
+} from "@/navigation";
 
 defineEmits(["navigate"]);
 const route = useRoute();
 const logoUrl = "/assets/burkina_education/images/logo.svg";
 
+// Academic portal nav is role-aware (Registrar/Examination Coordinator only
+// see their own slice, Academic Director sees everything - see
+// portal/roles/academic_api.py) - derived straight from session.roles
+// rather than waiting on the dashboard's own API call, so the sidebar is
+// correct on first paint.
+const academicFlags = computed(() => ({
+	isDirector: session.roles.includes("Academic Director"),
+	hasStructure: session.roles.includes("Academic Director") || session.roles.includes("Registrar"),
+	hasExams: session.roles.includes("Academic Director") || session.roles.includes("Examination Coordinator"),
+}));
+
 const navItems = computed(() => {
 	if (session.portal === "guardian" && route.params.student) {
 		return childNav(route.params.student);
 	}
-	if (session.portal === "guardian") return guardianNav;
-	if (session.portal === "teacher") return teacherNav(session.isClassTeacher);
-	return studentNav;
+	switch (session.portal) {
+		case "guardian":
+			return guardianNav;
+		case "teacher":
+			return teacherNav(session.isClassTeacher);
+		case "librarian":
+			return librarianNav;
+		case "transport":
+			return transportNav;
+		case "canteen":
+			return canteenNav;
+		case "boarding":
+			return boardingNav;
+		case "clinic":
+			return clinicNav;
+		case "finance":
+			return financeNav;
+		case "academic":
+			return academicNav(academicFlags.value);
+		case "comms":
+			return commsNav;
+		case "leadership":
+			return leadershipNav;
+		default:
+			return studentNav;
+	}
 });
 </script>

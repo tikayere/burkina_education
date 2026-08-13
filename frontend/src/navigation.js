@@ -54,3 +54,71 @@ export function teacherNav(isClassTeacher) {
 		{ label: "Messages", icon: "mail", to: { name: "teacher-messages" } },
 	];
 }
+
+// Staff portals (docs/architecture.md section M) - one nav array per Role
+// portal, same "declarative list of {label, icon, to}" shape as the three
+// above.
+
+export const librarianNav = [
+	{ label: "Tableau de bord", icon: "home", to: { name: "librarian-dashboard" } },
+	{ label: "Catalogue", icon: "book", to: { name: "librarian-catalogue" } },
+	{ label: "Adhésions", icon: "user-check", to: { name: "librarian-members" } },
+	{ label: "Emprunts", icon: "book-open", to: { name: "librarian-loans" } },
+];
+
+export const transportNav = [
+	{ label: "Tableau de bord", icon: "home", to: { name: "transport-dashboard" } },
+	{ label: "Itinéraires", icon: "map", to: { name: "transport-routes" } },
+	{ label: "Affectations", icon: "users", to: { name: "transport-assignments" } },
+];
+
+export const canteenNav = [
+	{ label: "Tableau de bord", icon: "home", to: { name: "canteen-dashboard" } },
+	{ label: "Formules", icon: "clipboard", to: { name: "canteen-plans" } },
+	{ label: "Abonnements", icon: "users", to: { name: "canteen-subscriptions" } },
+];
+
+export const boardingNav = [
+	{ label: "Tableau de bord", icon: "home", to: { name: "boarding-dashboard" } },
+	{ label: "Bâtiments", icon: "layers", to: { name: "boarding-buildings" } },
+	{ label: "Affectations", icon: "users", to: { name: "boarding-assignments" } },
+];
+
+export const clinicNav = [
+	{ label: "Tableau de bord", icon: "home", to: { name: "clinic-dashboard" } },
+	{ label: "Visites", icon: "activity", to: { name: "clinic-visits" } },
+];
+
+export const financeNav = [
+	{ label: "Tableau de bord", icon: "home", to: { name: "finance-dashboard" } },
+	{ label: "Factures", icon: "file-text", to: { name: "finance-invoices" } },
+	{ label: "Mobile Money", icon: "smartphone", to: { name: "finance-mobile-money" } },
+	{ label: "Bourses", icon: "award", to: { name: "finance-scholarships" } },
+];
+
+export function academicNav({ hasStructure, hasExams, isDirector }) {
+	return [
+		{ label: "Tableau de bord", icon: "home", to: { name: "academic-dashboard" } },
+		...(hasStructure ? [{ label: "Structure scolaire", icon: "layers", to: { name: "academic-structure" } }] : []),
+		...(hasExams ? [{ label: "Examens", icon: "clipboard", to: { name: "academic-exams" } }] : []),
+		...(isDirector
+			? [
+					{ label: "Pédagogie", icon: "book", to: { name: "academic-pedagogy" } },
+					{ label: "Discipline", icon: "shield", to: { name: "academic-discipline" } },
+					{ label: "Bourses", icon: "award", to: { name: "academic-scholarships" } },
+					{ label: "Annonces", icon: "bell", to: { name: "academic-announcements" } },
+				]
+			: []),
+	];
+}
+
+export const commsNav = [
+	{ label: "Tableau de bord", icon: "home", to: { name: "comms-dashboard" } },
+	{ label: "Annonces", icon: "bell", to: { name: "comms-announcements" } },
+	{ label: "Modèles", icon: "file-text", to: { name: "comms-templates" } },
+];
+
+export const leadershipNav = [
+	{ label: "Tableau de bord", icon: "home", to: { name: "leadership-dashboard" } },
+	{ label: "Discipline", icon: "shield", to: { name: "leadership-discipline" } },
+];

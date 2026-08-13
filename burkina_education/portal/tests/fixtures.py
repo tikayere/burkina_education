@@ -65,6 +65,14 @@ class PortalFixture(CommunicationFixture):
 		self.employee.db_set("user_id", user.name)
 		return user
 
+	def staff_user(self, role, email_prefix=None):
+		"""A plain staff login for the Vue staff portals (portal/roles/*.py) -
+		unlike Guardian/Student/Instructor these roles aren't ownership-scoped
+		(any Librarian sees every book), so tests only need *a* user holding
+		the role, not one wired to a specific record."""
+		email_prefix = email_prefix or role.lower().replace(" ", "-")
+		return get_or_create_user(f"{email_prefix}.{self.tag}@test-fixture.bf", [role])
+
 	def other_student_group(self):
 		"""A second Student Group (same term) this fixture's Instructor is
 		*not* attached to - for ownership-boundary tests."""

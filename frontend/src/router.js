@@ -75,11 +75,88 @@ const teacherRoutes = [
 	{ path: "/messages", name: "teacher-messages", component: () => import("@/pages/teacher/Messages.vue"), meta: { title: "Messages" } },
 ];
 
+// Staff portals (docs/architecture.md section M).
+
+const librarianRoutes = [
+	{ path: "/", name: "librarian-dashboard", component: () => import("@/pages/staff/librarian/Dashboard.vue"), meta: { title: "Tableau de bord" } },
+	{ path: "/catalogue", name: "librarian-catalogue", component: () => import("@/pages/staff/librarian/Catalogue.vue"), meta: { title: "Catalogue" } },
+	{ path: "/adhesions", name: "librarian-members", component: () => import("@/pages/staff/librarian/Members.vue"), meta: { title: "Adhésions" } },
+	{ path: "/emprunts", name: "librarian-loans", component: () => import("@/pages/staff/librarian/Loans.vue"), meta: { title: "Emprunts" } },
+];
+
+const transportRoutes = [
+	{ path: "/", name: "transport-dashboard", component: () => import("@/pages/staff/transport/Dashboard.vue"), meta: { title: "Tableau de bord" } },
+	{ path: "/itineraires", name: "transport-routes", component: () => import("@/pages/staff/transport/Routes.vue"), meta: { title: "Itinéraires" } },
+	{ path: "/affectations", name: "transport-assignments", component: () => import("@/pages/staff/transport/Assignments.vue"), meta: { title: "Affectations" } },
+];
+
+const canteenRoutes = [
+	{ path: "/", name: "canteen-dashboard", component: () => import("@/pages/staff/canteen/Dashboard.vue"), meta: { title: "Tableau de bord" } },
+	{ path: "/formules", name: "canteen-plans", component: () => import("@/pages/staff/canteen/Plans.vue"), meta: { title: "Formules" } },
+	{ path: "/abonnements", name: "canteen-subscriptions", component: () => import("@/pages/staff/canteen/Subscriptions.vue"), meta: { title: "Abonnements" } },
+];
+
+const boardingRoutes = [
+	{ path: "/", name: "boarding-dashboard", component: () => import("@/pages/staff/boarding/Dashboard.vue"), meta: { title: "Tableau de bord" } },
+	{ path: "/batiments", name: "boarding-buildings", component: () => import("@/pages/staff/boarding/Buildings.vue"), meta: { title: "Bâtiments" } },
+	{ path: "/affectations", name: "boarding-assignments", component: () => import("@/pages/staff/boarding/Assignments.vue"), meta: { title: "Affectations" } },
+];
+
+const clinicRoutes = [
+	{ path: "/", name: "clinic-dashboard", component: () => import("@/pages/staff/clinic/Dashboard.vue"), meta: { title: "Tableau de bord" } },
+	{ path: "/visites", name: "clinic-visits", component: () => import("@/pages/staff/clinic/Visits.vue"), meta: { title: "Visites" } },
+];
+
+const financeRoutes = [
+	{ path: "/", name: "finance-dashboard", component: () => import("@/pages/staff/finance/Dashboard.vue"), meta: { title: "Tableau de bord" } },
+	{ path: "/factures", name: "finance-invoices", component: () => import("@/pages/staff/finance/Invoices.vue"), meta: { title: "Factures" } },
+	{ path: "/factures/:name", name: "finance-invoice-detail", component: () => import("@/pages/staff/finance/InvoiceDetail.vue"), props: true, meta: { title: "Facture" } },
+	{ path: "/mobile-money", name: "finance-mobile-money", component: () => import("@/pages/staff/finance/MobileMoney.vue"), meta: { title: "Mobile Money" } },
+	{ path: "/bourses", name: "finance-scholarships", component: () => import("@/pages/staff/finance/Scholarships.vue"), meta: { title: "Bourses" } },
+];
+
+const academicRoutes = [
+	{ path: "/", name: "academic-dashboard", component: () => import("@/pages/staff/academic/Dashboard.vue"), meta: { title: "Tableau de bord" } },
+	{ path: "/structure", name: "academic-structure", component: () => import("@/pages/staff/academic/Structure.vue"), meta: { title: "Structure scolaire" } },
+	{ path: "/examens", name: "academic-exams", component: () => import("@/pages/staff/academic/Exams.vue"), meta: { title: "Examens" } },
+	{ path: "/pedagogie", name: "academic-pedagogy", component: () => import("@/pages/staff/academic/Pedagogy.vue"), meta: { title: "Pédagogie" } },
+	{ path: "/discipline", name: "academic-discipline", component: () => import("@/pages/staff/academic/Discipline.vue"), meta: { title: "Discipline" } },
+	// Same doctype/UI as the Finance and Communications portals - reused
+	// directly rather than duplicated (docs/architecture.md section M).
+	{ path: "/bourses", name: "academic-scholarships", component: () => import("@/pages/staff/finance/Scholarships.vue"), meta: { title: "Bourses" } },
+	{ path: "/annonces", name: "academic-announcements", component: () => import("@/pages/staff/comms/Announcements.vue"), meta: { title: "Annonces" } },
+];
+
+const commsRoutes = [
+	{ path: "/", name: "comms-dashboard", component: () => import("@/pages/staff/comms/Dashboard.vue"), meta: { title: "Tableau de bord" } },
+	{ path: "/annonces", name: "comms-announcements", component: () => import("@/pages/staff/comms/Announcements.vue"), meta: { title: "Annonces" } },
+	{ path: "/modeles", name: "comms-templates", component: () => import("@/pages/staff/comms/Templates.vue"), meta: { title: "Modèles" } },
+];
+
+const leadershipRoutes = [
+	{ path: "/", name: "leadership-dashboard", component: () => import("@/pages/staff/leadership/Dashboard.vue"), meta: { title: "Tableau de bord" } },
+	// Same doctype/UI as the Academic portal's own Discipline page - School
+	// Director's permissions on Disciplinary Case are just as broad.
+	{ path: "/discipline", name: "leadership-discipline", component: () => import("@/pages/staff/academic/Discipline.vue"), meta: { title: "Discipline" } },
+];
+
+const ROUTES_BY_PORTAL = {
+	guardian: guardianRoutes,
+	teacher: teacherRoutes,
+	student: studentRoutes,
+	librarian: librarianRoutes,
+	transport: transportRoutes,
+	canteen: canteenRoutes,
+	boarding: boardingRoutes,
+	clinic: clinicRoutes,
+	finance: financeRoutes,
+	academic: academicRoutes,
+	comms: commsRoutes,
+	leadership: leadershipRoutes,
+};
+
 function routesForRole() {
-	if (session.portal === "guardian") return guardianRoutes;
-	if (session.portal === "teacher") return teacherRoutes;
-	if (session.portal === "student") return studentRoutes;
-	return [];
+	return ROUTES_BY_PORTAL[session.portal] || [];
 }
 
 const AppShell = () => import("@/components/AppShell.vue");

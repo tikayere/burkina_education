@@ -13,6 +13,26 @@ function endpoint(path) {
 	return (args) => call(`burkina_education.portal.${path}`, args);
 }
 
+// Staff portals (docs/architecture.md section M) - one module per Role under
+// portal/roles/. Unlike the wrappers above, these mostly back onto plain
+// doctype CRUD the frontend does itself (see resource/ResourceListPage.vue)
+// rather than one bespoke endpoint per view - `roleEndpoint` only covers the
+// dashboard/guided-workflow functions each module actually defines.
+function roleEndpoint(path) {
+	return (args) => call(`burkina_education.portal.roles.${path}`, args);
+}
+
+/**
+ * Call a whitelisted *document* method (e.g. Announcement.publish,
+ * Student Boarding Assignment.check_out) through Frappe's own generic
+ * ``run_doc_method`` - re-checks permission against the real document, same
+ * as Desk calling that same button would. Used instead of writing a
+ * one-line Python wrapper for every such action a staff portal exposes.
+ */
+export function runDocMethod(doctype, name, method, args = {}) {
+	return call("run_doc_method", { dt: doctype, dn: name, method, args });
+}
+
 export const studentApi = {
 	dashboard: endpoint("student_api.get_dashboard"),
 	profile: endpoint("student_api.get_profile"),
@@ -126,4 +146,50 @@ export const teacherApi = {
 	announcements: endpoint("teacher_api.get_announcements"),
 	sendMessage: endpoint("teacher_api.send_message_to_guardian"),
 	inbox: endpoint("teacher_api.get_inbox"),
+};
+
+export const librarianApi = {
+	dashboard: roleEndpoint("librarian_api.get_dashboard"),
+	findMember: roleEndpoint("librarian_api.find_member"),
+	issueBook: roleEndpoint("librarian_api.issue_book"),
+	returnBook: roleEndpoint("librarian_api.return_book"),
+};
+
+export const transportApi = {
+	dashboard: roleEndpoint("transport_api.get_dashboard"),
+	routeStudents: roleEndpoint("transport_api.get_route_students"),
+};
+
+export const canteenApi = {
+	dashboard: roleEndpoint("canteen_api.get_dashboard"),
+	roster: roleEndpoint("canteen_api.get_roster"),
+	markConsumption: roleEndpoint("canteen_api.mark_consumption"),
+};
+
+export const boardingApi = {
+	dashboard: roleEndpoint("boarding_api.get_dashboard"),
+	availableBeds: roleEndpoint("boarding_api.get_available_beds"),
+	assignBed: roleEndpoint("boarding_api.assign_bed"),
+};
+
+export const clinicApi = {
+	dashboard: roleEndpoint("clinic_api.get_dashboard"),
+};
+
+export const financeApi = {
+	dashboard: roleEndpoint("finance_api.get_dashboard"),
+	recordPayment: roleEndpoint("finance_api.record_payment"),
+	retryMobileMoneyVerification: roleEndpoint("finance_api.retry_mobile_money_verification"),
+};
+
+export const academicApi = {
+	dashboard: roleEndpoint("academic_api.get_dashboard"),
+};
+
+export const commsApi = {
+	dashboard: roleEndpoint("comms_api.get_dashboard"),
+};
+
+export const leadershipApi = {
+	dashboard: roleEndpoint("leadership_api.get_dashboard"),
 };
