@@ -11,6 +11,7 @@
 		:columns="columns"
 		:form-fields="formFields"
 		:defaults="filters"
+		can-delete
 	/>
 </template>
 

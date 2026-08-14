@@ -14,6 +14,7 @@
 			order-by="from_date desc"
 			:columns="examColumns"
 			:form-fields="examFields"
+			:can-delete="isAcademicDirector"
 		/>
 		<ResourceListPage
 			v-else
@@ -27,6 +28,7 @@
 			:list-fields="scheduleListFields"
 			:columns="scheduleColumns"
 			:form-fields="scheduleFields"
+			:can-delete="isAcademicDirector"
 		/>
 	</div>
 </template>
@@ -34,7 +36,13 @@
 <script setup>
 import { ref } from "vue";
 import { TabButtons } from "frappe-ui";
+import { session } from "@/session";
 import ResourceListPage from "@/components/resource/ResourceListPage.vue";
+
+// Examination Coordinator (also on this page) has read/write/create but not
+// delete on Examination/Examination Schedule - only Academic Director does
+// (setup/install.py's per-doctype grants).
+const isAcademicDirector = session.roles.includes("Academic Director");
 
 const tabs = [
 	{ label: "Examens", value: "exams" },

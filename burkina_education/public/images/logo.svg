@@ -1,22 +1,32 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Burkina Education">
-  <!-- App icon: Burkina Faso flag colours (red/green, yellow star) behind a
-       simple graduation-cap + open-book glyph - shown on the Frappe /apps
-       screen and app switcher (hooks.py: app_logo_url / add_to_apps_screen). -->
+  <!-- App icon: matches the marketing mark (images/burkina_edu.png) - a green
+       graduation cap over an orange open book with a small gold star accent,
+       on a plain white card - rather than the earlier flag-stripe treatment.
+       Shown on the Frappe /apps screen and app switcher (hooks.py:
+       app_logo_url / add_to_apps_screen), and as the portal sidebar mark
+       (frontend/src/components/PortalSidebar.vue). -->
   <defs>
     <clipPath id="be-round">
       <rect x="0" y="0" width="64" height="64" rx="14" ry="14"/>
     </clipPath>
   </defs>
   <g clip-path="url(#be-round)">
-    <rect x="0" y="0" width="64" height="32" fill="#EF2B2D"/>
-    <rect x="0" y="32" width="64" height="32" fill="#009E49"/>
+    <rect x="0" y="0" width="64" height="64" fill="#ffffff"/>
   </g>
-  <polygon points="32,22 37.06,29.53 45.9,32 37.06,34.47 32,42 26.94,34.47 18.1,32 26.94,29.53"
+  <!-- Book -->
+  <g fill="#F5821F">
+    <path d="M13 33.5 L31 27.5 V47 L13 51 Z"/>
+    <path d="M51 33.5 L33 27.5 V47 L51 51 Z"/>
+  </g>
+  <path d="M31 27.5 V47 L32 47.3 L33 47 V27.5 L32 27.2 Z" fill="#c9600f"/>
+  <!-- Cap -->
+  <g fill="#00863d">
+    <path d="M32 14 L54 22.5 L32 31 L10 22.5 Z"/>
+    <path d="M19 25.4 V32.4 c0 3.6 6 6.5 13 6.5 s13 -2.9 13 -6.5 v-7 l-13 5 Z"/>
+  </g>
+  <circle cx="49.5" cy="25.4" r="1.6" fill="#00863d"/>
+  <rect x="48.8" y="25.4" width="1.4" height="9" rx="0.7" fill="#00863d"/>
+  <!-- Star accent -->
+  <polygon points="32,6.5 33.7,10.9 38.4,11.3 34.8,14.3 35.9,18.9 32,16.4 28.1,18.9 29.2,14.3 25.6,11.3 30.3,10.9"
            fill="#FCD116"/>
-  <g fill="#ffffff">
-    <path d="M14 20 L32 13 L50 20 L32 27 Z" opacity="0.96"/>
-    <path d="M20 23.4 V31 c0 3 5.4 5.4 12 5.4 s12 -2.4 12 -5.4 v-7.6 l-12 4.6 Z" opacity="0.9"/>
-    <circle cx="47" cy="23.4" r="1.6"/>
-    <rect x="46.3" y="23.4" width="1.4" height="10" rx="0.7"/>
-  </g>
 </svg>

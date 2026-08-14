@@ -1,6 +1,6 @@
 <template>
 	<div v-if="loading" class="flex justify-center py-20">
-		<LoadingIndicator class="h-6 w-6 text-bf-red-500" />
+		<LoadingIndicator class="h-6 w-6 text-bf-green-500" />
 	</div>
 	<div v-else class="space-y-6">
 		<EmptyState v-if="!data.children.length" icon="users" title="Aucun élève associé à ce compte" />
@@ -9,12 +9,12 @@
 				v-for="c in data.children"
 				:key="c.name"
 				:to="{ name: 'child-overview', params: { student: c.name } }"
-				class="group rounded-xl border border-gray-100 bg-white p-5 shadow-sm transition hover:border-bf-red-200 hover:shadow-md"
+				class="group rounded-xl border border-gray-100 bg-white p-5 shadow-sm transition hover:border-bf-green-200 hover:shadow-md"
 			>
 				<div class="flex items-center gap-3">
 					<Avatar :label="c.student_name" :image="c.image" size="xl" />
 					<div class="min-w-0">
-						<h3 class="truncate font-semibold text-gray-900 group-hover:text-bf-red-600">{{ c.student_name }}</h3>
+						<h3 class="truncate font-semibold text-gray-900 group-hover:text-bf-green-600">{{ c.student_name }}</h3>
 						<p class="text-sm text-gray-500">{{ c.grade_name || "—" }}</p>
 					</div>
 				</div>

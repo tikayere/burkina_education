@@ -1,7 +1,7 @@
 <template>
 	<div class="space-y-4">
 		<div v-if="list.loading && !list.data" class="flex justify-center py-20">
-			<LoadingIndicator class="h-6 w-6 text-bf-red-500" />
+			<LoadingIndicator class="h-6 w-6 text-bf-green-500" />
 		</div>
 		<SectionCard v-else title="Transactions Mobile Money" no-padding>
 			<EmptyState v-if="!list.data?.length" icon="smartphone" title="Aucune transaction" />

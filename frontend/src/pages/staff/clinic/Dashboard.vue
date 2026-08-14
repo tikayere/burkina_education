@@ -1,6 +1,6 @@
 <template>
 	<div v-if="loading" class="flex justify-center py-20">
-		<LoadingIndicator class="h-6 w-6 text-bf-red-500" />
+		<LoadingIndicator class="h-6 w-6 text-bf-green-500" />
 	</div>
 	<div v-else class="space-y-6">
 		<div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -9,6 +9,10 @@
 			<StatCard label="Suivi requis" :value="data.follow_up" icon="alert-triangle" :tone="data.follow_up ? 'red' : 'gray'" />
 			<StatCard label="Parents non informés" :value="data.not_notified" icon="bell" :tone="data.not_notified ? 'red' : 'gray'" />
 		</div>
+
+		<SectionCard v-if="statusBreakdown.length" title="Visites récentes par statut">
+			<DonutChart :data="statusBreakdown" />
+		</SectionCard>
 
 		<SectionCard title="Visites récentes" no-padding>
 			<EmptyState v-if="!data.recent.length" icon="activity" title="Aucune visite enregistrée" />
@@ -39,6 +43,7 @@
 </template>
 
 <script setup>
+import { computed } from "vue";
 import { FeatherIcon, LoadingIndicator } from "frappe-ui";
 import { clinicApi } from "@/api";
 import { useAsync } from "@/composables/useAsync";
@@ -47,8 +52,19 @@ import StatCard from "@/components/StatCard.vue";
 import SectionCard from "@/components/SectionCard.vue";
 import EmptyState from "@/components/EmptyState.vue";
 import StatusBadge from "@/components/StatusBadge.vue";
+import DonutChart from "@/components/charts/DonutChart.vue";
 
 const { data, loading } = useAsync(() => clinicApi.dashboard(), {
 	initial: { visits_today: 0, open_cases: 0, follow_up: 0, not_notified: 0, recent: [] },
+});
+
+// Same tone mapping as the table's own StatusBadge below, just recomputed as
+// chart colors - client-side tally over the already-fetched `recent` list
+// (no new backend query, same data the table already shows).
+const STATUS_COLOR = { Clos: "#1baf7a", "Suivi requis": "#e34948" };
+const statusBreakdown = computed(() => {
+	const counts = {};
+	for (const v of data.value.recent) counts[v.status] = (counts[v.status] || 0) + 1;
+	return Object.entries(counts).map(([label, value]) => ({ label, value, color: STATUS_COLOR[label] || "#eda100" }));
 });
 </script>

@@ -5,11 +5,11 @@
 				<label class="text-sm font-medium text-gray-600">Date</label>
 				<input v-model="date" type="date" class="rounded-md border-gray-300 text-sm" @change="load" />
 			</div>
-			<Button variant="solid" theme="red" :loading="saving" @click="save">Enregistrer l'appel</Button>
+			<Button variant="solid" theme="green" :loading="saving" @click="save">Enregistrer l'appel</Button>
 		</div>
 
 		<div v-if="loading" class="flex justify-center py-20">
-			<LoadingIndicator class="h-6 w-6 text-bf-red-500" />
+			<LoadingIndicator class="h-6 w-6 text-bf-green-500" />
 		</div>
 		<SectionCard v-else title="Faire l'appel" no-padding>
 			<EmptyState v-if="!roster.length" icon="users" title="Aucun élève dans cette classe" />

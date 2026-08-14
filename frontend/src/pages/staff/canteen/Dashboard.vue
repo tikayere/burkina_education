@@ -1,6 +1,6 @@
 <template>
 	<div v-if="loading" class="flex justify-center py-20">
-		<LoadingIndicator class="h-6 w-6 text-bf-red-500" />
+		<LoadingIndicator class="h-6 w-6 text-bf-green-500" />
 	</div>
 	<div v-else class="space-y-6">
 		<div class="grid grid-cols-2 gap-4 sm:grid-cols-3">
@@ -8,6 +8,10 @@
 			<StatCard label="Abonnements actifs" :value="data.active_subscriptions" icon="users" tone="gold" />
 			<StatCard label="Repas pris aujourd'hui" :value="data.consumed_today" icon="check-circle" tone="green" />
 		</div>
+
+		<SectionCard v-if="plansBreakdown.length" title="Abonnements par formule">
+			<DonutChart :data="plansBreakdown" />
+		</SectionCard>
 
 		<SectionCard title="Faire l'appel du repas">
 			<div class="flex flex-wrap items-end gap-3">
@@ -37,7 +41,7 @@
 						<input type="checkbox" :checked="allChecked" @change="toggleAll($event.target.checked)" />
 						Tout sélectionner
 					</label>
-					<Button variant="solid" theme="red" size="sm" :loading="marking" @click="markSelected">
+					<Button variant="solid" theme="green" size="sm" :loading="marking" @click="markSelected">
 						Marquer présent ({{ selected.length }})
 					</Button>
 				</div>
@@ -64,12 +68,17 @@ import { useAsync, notifyError, notifySuccess } from "@/composables/useAsync";
 import StatCard from "@/components/StatCard.vue";
 import SectionCard from "@/components/SectionCard.vue";
 import EmptyState from "@/components/EmptyState.vue";
+import DonutChart from "@/components/charts/DonutChart.vue";
 
 const mealTypes = ["Petit-déjeuner", "Déjeuner", "Goûter"];
 
 const { data, loading } = useAsync(() => canteenApi.dashboard(), {
 	initial: { plans: 0, active_subscriptions: 0, consumed_today: 0, by_plan: [] },
 });
+
+const plansBreakdown = computed(() =>
+	data.value.by_plan.filter((p) => p.n > 0).map((p) => ({ label: p.plan_name || "—", value: p.n })),
+);
 
 const rosterForm = reactive({ meal_plan: "", meal_type: "Déjeuner", date: new Date().toISOString().slice(0, 10) });
 const roster = ref([]);

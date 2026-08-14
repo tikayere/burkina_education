@@ -1,14 +1,14 @@
 <template>
 	<div class="space-y-4">
 		<div class="flex justify-end">
-			<Button variant="solid" theme="red" @click="openCreate">
+			<Button variant="solid" theme="green" @click="openCreate">
 				<template #prefix><FeatherIcon name="plus" class="h-4 w-4" /></template>
 				Nouvelle annonce
 			</Button>
 		</div>
 
 		<div v-if="list.loading && !list.data" class="flex justify-center py-20">
-			<LoadingIndicator class="h-6 w-6 text-bf-red-500" />
+			<LoadingIndicator class="h-6 w-6 text-bf-green-500" />
 		</div>
 		<SectionCard v-else no-padding>
 			<EmptyState v-if="!list.data?.length" icon="bell" title="Aucune annonce" />
@@ -36,6 +36,9 @@
 							<div class="flex justify-end gap-2">
 								<Button v-if="a.publication_status === 'Draft'" size="sm" variant="outline" :loading="acting === a.name" @click="publish(a)">Publier</Button>
 								<Button v-if="a.publication_status === 'Published'" size="sm" variant="outline" theme="gray" :loading="acting === a.name" @click="archive(a)">Archiver</Button>
+								<button v-if="canDelete" class="p-1.5 text-gray-400 hover:text-bf-red-500" @click="confirmDelete(a)">
+									<FeatherIcon name="trash-2" class="h-4 w-4" />
+								</button>
 							</div>
 						</td>
 					</tr>
@@ -88,7 +91,7 @@
 				</div>
 			</template>
 			<template #actions>
-				<Button variant="solid" theme="red" class="w-full" :loading="saving" @click="save">Créer le brouillon</Button>
+				<Button variant="solid" theme="green" class="w-full" :loading="saving" @click="save">Créer le brouillon</Button>
 			</template>
 		</Dialog>
 	</div>
@@ -102,13 +105,20 @@
  * doctype's own existing whitelisted methods via runDocMethod rather than a
  * new Python wrapper - see comms_api.py's module docstring. */
 import { reactive, ref } from "vue";
-import { Button, Dialog, FeatherIcon, FormControl, LoadingIndicator, call, createListResource } from "frappe-ui";
+import { Button, Dialog, FeatherIcon, FormControl, LoadingIndicator, call, confirmDialog, createListResource } from "frappe-ui";
 import { runDocMethod } from "@/api";
+import { session } from "@/session";
 import { notifyError, notifySuccess } from "@/composables/useAsync";
 import SectionCard from "@/components/SectionCard.vue";
 import EmptyState from "@/components/EmptyState.vue";
 import StatusBadge from "@/components/StatusBadge.vue";
 import LinkField from "@/components/resource/LinkField.vue";
+
+// This same component backs both the Communications (Secretary) and
+// Academic (Academic Director) portals (router.js's "academic-announcements"
+// reuses this file). Secretary has no delete on Announcement; School
+// Director/Academic Director do (setup/install.py's per-doctype grants).
+const canDelete = session.roles.includes("Academic Director") || session.roles.includes("School Director");
 
 const list = createListResource({
 	doctype: "Announcement",
@@ -207,5 +217,22 @@ async function archive(row) {
 	} finally {
 		acting.value = "";
 	}
+}
+
+function confirmDelete(row) {
+	confirmDialog({
+		title: "Confirmer la suppression",
+		message: `Voulez-vous vraiment supprimer « ${row.title} » ? Cette action est irréversible.`,
+		onConfirm: async ({ hideDialog }) => {
+			try {
+				await call("frappe.client.delete", { doctype: "Announcement", name: row.name });
+				notifySuccess("Annonce supprimée.");
+				list.reload();
+				hideDialog();
+			} catch (e) {
+				notifyError(e);
+			}
+		},
+	});
 }
 </script>

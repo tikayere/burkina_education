@@ -1,6 +1,6 @@
 <template>
 	<div v-if="loading" class="flex justify-center py-20">
-		<LoadingIndicator class="h-6 w-6 text-bf-red-500" />
+		<LoadingIndicator class="h-6 w-6 text-bf-green-500" />
 	</div>
 	<div v-else class="space-y-6">
 		<StatCard
@@ -31,7 +31,7 @@
 						<td class="px-5 py-3">{{ formatCurrency(inv.outstanding_amount, inv.currency) }}</td>
 						<td class="px-5 py-3"><StatusBadge :text="inv.status" :tone="inv.outstanding_amount > 0 ? 'red' : 'green'" /></td>
 						<td class="px-5 py-3 text-right">
-							<router-link :to="invoiceRoute(inv.name)" class="text-bf-red-600 hover:underline">Détails</router-link>
+							<router-link :to="invoiceRoute(inv.name)" class="text-bf-green-600 hover:underline">Détails</router-link>
 						</td>
 					</tr>
 				</tbody>

@@ -6,3 +6,4 @@
 # Patches added in this section will be executed after doctypes are migrated
 burkina_education.patches.v1_0.add_show_title_field_in_link
 burkina_education.patches.v1_0.add_department_head_and_receptionist_permissions
+burkina_education.patches.v1_0.add_student_records_permissions

@@ -62,6 +62,7 @@ def after_install():
 	create_department_head_permissions()
 	create_receptionist_permissions()
 	create_admissions_permissions()
+	create_student_records_permissions()
 	enable_xof_currency()
 	ensure_item_group_root()
 	ensure_stock_uom_default()
@@ -373,6 +374,36 @@ def create_admissions_permissions():
 		if role == "Registrar":
 			continue
 		update_permission_property("Student Applicant", role, 0, "delete", 1)
+
+
+#: Student/Guardian (§10/§12, docs/architecture.md section C) currently ship
+#: with no role of ours holding any permission on them at all - only
+#: Education's own "Academics User" (never assigned to anyone here, see
+#: NEW_ROLES above) gets read/write/create/delete. That leaves nobody able to
+#: act on a day-to-day record change (updating a phone number, marking a
+#: transfer, **suspending a student** - master.md §10's own status list
+#: already carries "Suspended"/"Withdrawn"/"Repeating") once admissions has
+#: created it. Registrar owns this the same way it owns Student Applicant
+#: (create_admissions_permissions above) since converting an accepted
+#: applicant into an enrolled Student is the same pipeline; delete is
+#: withheld from Registrar for the same reason it's withheld from Student
+#: Applicant there - Academic Director/School Director are the roles that
+#: can retire a record outright, not day-to-day intake.
+STUDENT_RECORDS_WRITE_ROLES = ("Registrar", "Academic Director", "School Director")
+STUDENT_RECORDS_DOCTYPES = ("Student", "Guardian")
+
+
+def create_student_records_permissions():
+	from frappe.permissions import add_permission, update_permission_property
+
+	for doctype in STUDENT_RECORDS_DOCTYPES:
+		for role in STUDENT_RECORDS_WRITE_ROLES:
+			add_permission(doctype, role, 0)
+			for ptype in ("read", "write", "create", "print", "email", "report", "export"):
+				update_permission_property(doctype, role, 0, ptype, 1)
+			if role == "Registrar":
+				continue
+			update_permission_property(doctype, role, 0, "delete", 1)
 
 
 def enable_xof_currency():

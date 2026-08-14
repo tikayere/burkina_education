@@ -1,14 +1,14 @@
 <template>
 	<div class="space-y-4">
 		<div class="flex justify-end">
-			<Button variant="solid" theme="red" @click="openCreate">
+			<Button variant="solid" theme="green" @click="openCreate">
 				<template #prefix><FeatherIcon name="plus" class="h-4 w-4" /></template>
 				Nouvel itinéraire
 			</Button>
 		</div>
 
 		<div v-if="list.loading && !list.data" class="flex justify-center py-20">
-			<LoadingIndicator class="h-6 w-6 text-bf-red-500" />
+			<LoadingIndicator class="h-6 w-6 text-bf-green-500" />
 		</div>
 		<SectionCard v-else no-padding>
 			<EmptyState v-if="!list.data?.length" icon="map" title="Aucun itinéraire" />
@@ -19,6 +19,7 @@
 						<th class="px-5 py-3">Véhicule</th>
 						<th class="px-5 py-3">Chauffeur</th>
 						<th class="px-5 py-3">Distance</th>
+						<th class="px-5 py-3 text-right">Actions</th>
 					</tr>
 				</thead>
 				<tbody class="divide-y divide-gray-100">
@@ -27,6 +28,11 @@
 						<td class="px-5 py-3 text-gray-500">{{ r.vehicle || "—" }}</td>
 						<td class="px-5 py-3 text-gray-500">{{ r.driver || "—" }}</td>
 						<td class="px-5 py-3">{{ r.distance_km ? `${r.distance_km} km` : "—" }}</td>
+						<td class="px-5 py-3 text-right" @click.stop>
+							<button class="p-1.5 text-gray-400 hover:text-bf-red-500" @click="confirmDelete(r)">
+								<FeatherIcon name="trash-2" class="h-4 w-4" />
+							</button>
+						</td>
 					</tr>
 				</tbody>
 			</table>
@@ -64,7 +70,7 @@
 				</div>
 			</template>
 			<template #actions>
-				<Button variant="solid" theme="red" class="w-full" :loading="saving" @click="save">Enregistrer</Button>
+				<Button variant="solid" theme="green" class="w-full" :loading="saving" @click="save">Enregistrer</Button>
 			</template>
 		</Dialog>
 	</div>
@@ -75,7 +81,7 @@
  * cover generically - it has a child table (stops) - so it gets its own
  * page rather than a config object (docs/architecture.md section M). */
 import { reactive, ref } from "vue";
-import { Button, Dialog, FeatherIcon, FormControl, LoadingIndicator, call, createListResource } from "frappe-ui";
+import { Button, Dialog, FeatherIcon, FormControl, LoadingIndicator, call, confirmDialog, createListResource } from "frappe-ui";
 import { notifyError, notifySuccess } from "@/composables/useAsync";
 import SectionCard from "@/components/SectionCard.vue";
 import EmptyState from "@/components/EmptyState.vue";
@@ -144,5 +150,22 @@ async function save() {
 	} finally {
 		saving.value = false;
 	}
+}
+
+function confirmDelete(row) {
+	confirmDialog({
+		title: "Confirmer la suppression",
+		message: `Voulez-vous vraiment supprimer l'itinéraire « ${row.route_name} » ? Cette action est irréversible.`,
+		onConfirm: async ({ hideDialog }) => {
+			try {
+				await call("frappe.client.delete", { doctype: "Transport Route", name: row.name });
+				notifySuccess("Itinéraire supprimé.");
+				list.reload();
+				hideDialog();
+			} catch (e) {
+				notifyError(e);
+			}
+		},
+	});
 }
 </script>

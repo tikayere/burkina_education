@@ -1,6 +1,6 @@
 <template>
 	<div v-if="loading" class="flex justify-center py-20">
-		<LoadingIndicator class="h-6 w-6 text-bf-red-500" />
+		<LoadingIndicator class="h-6 w-6 text-bf-green-500" />
 	</div>
 	<div v-else class="space-y-6">
 		<div class="grid grid-cols-2 gap-4 sm:grid-cols-3">
@@ -14,6 +14,24 @@
 			<StatCard label="Abonnés cantine" :value="data.canteen.active_subscriptions" icon="coffee" tone="gray" />
 			<StatCard label="Élèves transportés" :value="data.transport.active_assignments" icon="truck" tone="gray" />
 			<StatCard label="Dossiers infirmerie ouverts" :value="data.clinic.open_cases" icon="activity" :tone="data.clinic.open_cases ? 'gold' : 'gray'" />
+		</div>
+
+		<div class="grid gap-6 lg:grid-cols-2">
+			<SectionCard title="Occupation de l'internat">
+				<EmptyState v-if="!data.boarding.beds" icon="moon" title="Aucun lit configuré" />
+				<DonutChart
+					v-else
+					:data="[
+						{ label: 'Occupés', value: data.boarding.occupied, color: '#00863d' },
+						{ label: 'Disponibles', value: data.boarding.beds - data.boarding.occupied, color: '#e5e7eb' },
+					]"
+				/>
+			</SectionCard>
+
+			<SectionCard title="Dossiers disciplinaires ouverts, par gravité">
+				<EmptyState v-if="!data.school.open_discipline_cases" icon="check-circle" title="Aucun dossier ouvert" />
+				<BarChart v-else :data="severityBars" :height="150" />
+			</SectionCard>
 		</div>
 
 		<SectionCard title="Discipline - dossiers ouverts" no-padding>
@@ -33,6 +51,7 @@
 </template>
 
 <script setup>
+import { computed } from "vue";
 import { LoadingIndicator } from "frappe-ui";
 import { leadershipApi } from "@/api";
 import { useAsync } from "@/composables/useAsync";
@@ -41,6 +60,8 @@ import StatCard from "@/components/StatCard.vue";
 import SectionCard from "@/components/SectionCard.vue";
 import EmptyState from "@/components/EmptyState.vue";
 import StatusBadge from "@/components/StatusBadge.vue";
+import DonutChart from "@/components/charts/DonutChart.vue";
+import BarChart from "@/components/charts/BarChart.vue";
 
 const { data, loading } = useAsync(() => leadershipApi.dashboard(), {
 	initial: {
@@ -51,6 +72,15 @@ const { data, loading } = useAsync(() => leadershipApi.dashboard(), {
 		clinic: { open_cases: 0 },
 		comms: { published_announcements: 0 },
 		recent_discipline: [],
+		discipline_by_severity: [],
 	},
 });
+
+// Same red/gold/gray tones as the StatusBadge severity cells in the table
+// below, not the chart's default categorical palette - a severity is a
+// status, not an arbitrary category (dataviz: status colors are reserved).
+const SEVERITY_COLOR = { Mineure: "#9ca3af", Modérée: "#eab308", Grave: "#EF2B2D" };
+const severityBars = computed(() =>
+	data.value.discipline_by_severity.map((s) => ({ ...s, color: SEVERITY_COLOR[s.label] }))
+);
 </script>

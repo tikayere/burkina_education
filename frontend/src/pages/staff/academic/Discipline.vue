@@ -1,4 +1,8 @@
 <template>
+	<!-- Reached from both the academic (Academic Director) and leadership
+	     (School Director) portals - both hold delete on Disciplinary Case
+	     (setup/install.py's per-doctype grants), so can-delete is
+	     unconditional rather than role-gated here. -->
 	<ResourceListPage
 		doctype="Disciplinary Case"
 		title="Discipline"
@@ -9,6 +13,7 @@
 		order-by="date desc"
 		:columns="columns"
 		:form-fields="formFields"
+		can-delete
 	/>
 </template>
 

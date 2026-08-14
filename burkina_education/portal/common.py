@@ -68,7 +68,55 @@ def attendance_overview(student):
 	return {
 		"last_30_days": grading.get_attendance_summary(student, add_days(today, -30), today),
 		"this_year": grading.get_attendance_summary(student, add_days(today, -365), today),
+		"monthly_trend": attendance_monthly_trend(student),
 	}
+
+
+#: French month abbreviations - Frappe's own ``frappe.utils.formatdate`` takes
+#: "dd"/"mm"/"yyyy"-style tokens, not a "MMM" name token, so there's no
+#: built-in way to get a short French month label from it. Exported (not
+#: underscore-prefixed) since finance_api.py's own monthly trend needs the
+#: same labels and there's no reason to duplicate the table.
+MONTH_ABBR_FR = {
+	1: "Janv", 2: "Févr", 3: "Mars", 4: "Avr", 5: "Mai", 6: "Juin",
+	7: "Juil", 8: "Août", 9: "Sept", 10: "Oct", 11: "Nov", 12: "Déc",
+}
+
+
+def attendance_monthly_trend(student, months=6):
+	"""Month-by-month attendance percentage for the last ``months`` months -
+	powers the "Évolution des présences" chart on the Student/Guardian
+	Overview page (see frontend Overview.vue), the same shape as the
+	marketing mockup's own dashboard chart. Same Student Attendance scope as
+	``attendance_overview`` above, just grouped by calendar month instead of
+	collapsed into one summary.
+	"""
+	from frappe.utils import add_months, getdate
+
+	start = getdate(add_months(nowdate(), -(months - 1))).replace(day=1)
+	rows = frappe.db.sql(
+		"""
+		select date_format(date, '%%Y-%%m') as ym,
+			sum(case when status in ('Present', 'Late') then 1 else 0 end) as attended,
+			count(*) as total
+		from `tabStudent Attendance`
+		where student = %(student)s and docstatus = 1 and date >= %(start)s
+		group by ym
+		""",
+		{"student": student, "start": start},
+		as_dict=True,
+	)
+	by_month = {r.ym: r for r in rows}
+
+	out = []
+	cursor = start
+	for _ in range(months):
+		key = cursor.strftime("%Y-%m")
+		row = by_month.get(key)
+		percentage = round(row.attended / row.total * 100, 1) if row and row.total else None
+		out.append({"month": key, "label": MONTH_ABBR_FR[cursor.month], "percentage": percentage})
+		cursor = getdate(add_months(cursor, 1))
+	return out
 
 
 def attendance_records(student, from_date, to_date):

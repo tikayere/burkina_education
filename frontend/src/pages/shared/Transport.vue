@@ -1,6 +1,6 @@
 <template>
 	<div v-if="loading" class="flex justify-center py-20">
-		<LoadingIndicator class="h-6 w-6 text-bf-red-500" />
+		<LoadingIndicator class="h-6 w-6 text-bf-green-500" />
 	</div>
 	<EmptyState v-else-if="!data.assignment" icon="truck" title="Aucune affectation de transport" />
 	<div v-else class="space-y-6">
@@ -31,7 +31,7 @@
 					</tr>
 				</thead>
 				<tbody class="divide-y divide-gray-100">
-					<tr v-for="s in data.assignment.route_detail?.stops || []" :key="s.sequence" :class="{ 'bg-bf-red-50': s.stop_name === data.assignment.stop_name }">
+					<tr v-for="s in data.assignment.route_detail?.stops || []" :key="s.sequence" :class="{ 'bg-bf-green-50': s.stop_name === data.assignment.stop_name }">
 						<td class="px-5 py-3">{{ s.sequence }}</td>
 						<td class="px-5 py-3 font-medium text-gray-800">{{ s.stop_name }}</td>
 						<td class="px-5 py-3">{{ formatTime(s.pickup_time) }}</td>

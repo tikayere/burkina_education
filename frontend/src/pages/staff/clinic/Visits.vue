@@ -9,6 +9,7 @@
 		order-by="date desc"
 		:columns="columns"
 		:form-fields="formFields"
+		can-delete
 	/>
 </template>
 

@@ -1,6 +1,6 @@
 <template>
 	<div v-if="loading" class="flex justify-center py-20">
-		<LoadingIndicator class="h-6 w-6 text-bf-red-500" />
+		<LoadingIndicator class="h-6 w-6 text-bf-green-500" />
 	</div>
 	<div v-else class="space-y-6">
 		<div class="grid grid-cols-2 gap-4 sm:grid-cols-3">
@@ -8,6 +8,10 @@
 			<StatCard label="Élèves affectés" :value="data.active_assignments" icon="users" tone="gold" />
 			<StatCard label="Sans arrêt défini" :value="data.unassigned_stop" icon="alert-triangle" :tone="data.unassigned_stop ? 'red' : 'gray'" />
 		</div>
+
+		<SectionCard v-if="routesChart.length" title="Élèves par itinéraire">
+			<BarChart :data="routesChart" />
+		</SectionCard>
 
 		<SectionCard title="Occupation par itinéraire" no-padding>
 			<EmptyState v-if="!data.routes.length" icon="map" title="Aucun itinéraire" />
@@ -36,14 +40,20 @@
 </template>
 
 <script setup>
+import { computed } from "vue";
 import { LoadingIndicator } from "frappe-ui";
 import { transportApi } from "@/api";
 import { useAsync } from "@/composables/useAsync";
 import StatCard from "@/components/StatCard.vue";
 import SectionCard from "@/components/SectionCard.vue";
 import EmptyState from "@/components/EmptyState.vue";
+import BarChart from "@/components/charts/BarChart.vue";
 
 const { data, loading } = useAsync(() => transportApi.dashboard(), {
 	initial: { routes: [], routes_count: 0, active_assignments: 0, unassigned_stop: 0 },
 });
+
+const routesChart = computed(() =>
+	data.value.routes.filter((r) => r.student_count > 0).map((r) => ({ label: r.route_name, value: r.student_count })),
+);
 </script>

@@ -1,6 +1,6 @@
 <template>
 	<div v-if="loading" class="flex justify-center py-20">
-		<LoadingIndicator class="h-6 w-6 text-bf-red-500" />
+		<LoadingIndicator class="h-6 w-6 text-bf-green-500" />
 	</div>
 	<div v-else-if="error" class="rounded-lg bg-bf-red-50 p-4 text-sm text-bf-red-600">{{ error }}</div>
 	<div v-else-if="data" class="space-y-6">
@@ -50,6 +50,18 @@
 			/>
 		</div>
 
+		<SectionCard title="Évolution des présences" subtitle="6 derniers mois">
+			<EmptyState v-if="!hasAttendanceTrend" icon="trending-up" title="Pas encore de présence enregistrée" />
+			<TrendChart
+				v-else
+				:labels="trendLabels"
+				:values="trendValues"
+				:format-value="(v) => (v === null ? '—' : `${v}%`)"
+				:min="0"
+				:height="180"
+			/>
+		</SectionCard>
+
 		<div class="grid gap-6 lg:grid-cols-2">
 			<SectionCard title="Prochains cours">
 				<EmptyState v-if="!data.upcoming_schedule.length" icon="calendar" title="Aucun cours planifié" />
@@ -96,6 +108,7 @@ import StatCard from "@/components/StatCard.vue";
 import SectionCard from "@/components/SectionCard.vue";
 import EmptyState from "@/components/EmptyState.vue";
 import StatusBadge from "@/components/StatusBadge.vue";
+import TrendChart from "@/components/charts/TrendChart.vue";
 
 const props = defineProps({ student: { type: String, default: "" } });
 const api = computed(() => (props.student ? childApi(props.student) : selfApi()));
@@ -104,4 +117,17 @@ const { data, loading, error } = useAsync(() => api.value.overview(), { watchSou
 function imageUrl(image) {
 	return image || null;
 }
+
+// Months before the student's first ever attendance record come back with
+// `percentage: null` (common.py::attendance_monthly_trend) - dropped from the
+// front of the series rather than charted as 0%, which would misread as "no
+// attendance" instead of "not enrolled/no data yet".
+const attendanceTrend = computed(() => {
+	const rows = data.value?.attendance?.monthly_trend || [];
+	const firstWithData = rows.findIndex((r) => r.percentage !== null);
+	return firstWithData === -1 ? [] : rows.slice(firstWithData);
+});
+const hasAttendanceTrend = computed(() => attendanceTrend.value.length > 0);
+const trendLabels = computed(() => attendanceTrend.value.map((r) => r.label));
+const trendValues = computed(() => attendanceTrend.value.map((r) => r.percentage ?? 0));
 </script>

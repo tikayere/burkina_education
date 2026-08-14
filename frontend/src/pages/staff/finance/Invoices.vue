@@ -6,13 +6,13 @@
 				v-model="query"
 				type="text"
 				placeholder="Rechercher un élève..."
-				class="w-full rounded-md border-gray-200 py-1.5 pl-8 text-sm focus:border-bf-red-400 focus:ring-bf-red-400"
+				class="w-full rounded-md border-gray-200 py-1.5 pl-8 text-sm focus:border-bf-green-400 focus:ring-bf-green-400"
 				@input="onSearch"
 			/>
 		</div>
 
 		<div v-if="list.loading && !list.data" class="flex justify-center py-20">
-			<LoadingIndicator class="h-6 w-6 text-bf-red-500" />
+			<LoadingIndicator class="h-6 w-6 text-bf-green-500" />
 		</div>
 		<SectionCard v-else no-padding>
 			<EmptyState v-if="!list.data?.length" icon="file-text" title="Aucune facture" />

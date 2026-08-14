@@ -1,6 +1,6 @@
 <template>
 	<div v-if="loading" class="flex justify-center py-20">
-		<LoadingIndicator class="h-6 w-6 text-bf-red-500" />
+		<LoadingIndicator class="h-6 w-6 text-bf-green-500" />
 	</div>
 	<EmptyState v-else-if="!data.subscription" icon="coffee" title="Aucun abonnement cantine actif" />
 	<div v-else class="space-y-6">
