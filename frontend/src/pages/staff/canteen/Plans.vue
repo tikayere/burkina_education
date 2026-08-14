@@ -8,6 +8,7 @@
 		search-field="plan_name"
 		:columns="columns"
 		:form-fields="formFields"
+		can-delete
 	/>
 </template>
 

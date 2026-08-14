@@ -1,6 +1,6 @@
 <template>
 	<div v-if="loading" class="flex justify-center py-20">
-		<LoadingIndicator class="h-6 w-6 text-bf-red-500" />
+		<LoadingIndicator class="h-6 w-6 text-bf-green-500" />
 	</div>
 	<SectionCard v-else title="Évaluations" no-padding>
 		<EmptyState v-if="!data.length" icon="award" title="Aucune évaluation planifiée" />
@@ -23,7 +23,7 @@
 					<td class="px-5 py-3">{{ formatDate(p.schedule_date) }}</td>
 					<td class="px-5 py-3">/ {{ p.maximum_assessment_score }}</td>
 					<td class="px-5 py-3 text-right">
-						<router-link :to="{ name: 'teacher-gradebook-plan', params: { plan: p.name } }" class="text-bf-red-600 hover:underline">
+						<router-link :to="{ name: 'teacher-gradebook-plan', params: { plan: p.name } }" class="text-bf-green-600 hover:underline">
 							Saisir les notes
 						</router-link>
 					</td>

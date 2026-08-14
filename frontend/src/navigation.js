@@ -100,6 +100,7 @@ export function academicNav({ hasStructure, hasExams, hasPedagogy, hasAdmissions
 	return [
 		{ label: "Tableau de bord", icon: "home", to: { name: "academic-dashboard" } },
 		...(hasAdmissions ? [{ label: "Admissions", icon: "user-plus", to: { name: "academic-admissions" } }] : []),
+		...(hasStructure ? [{ label: "Élèves", icon: "users", to: { name: "academic-students" } }] : []),
 		...(hasStructure ? [{ label: "Structure scolaire", icon: "layers", to: { name: "academic-structure" } }] : []),
 		...(hasExams ? [{ label: "Examens", icon: "clipboard", to: { name: "academic-exams" } }] : []),
 		// Department Head gets Pédagogie on its own (curriculum authoring,

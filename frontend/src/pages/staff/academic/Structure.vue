@@ -2,6 +2,11 @@
 	<div class="space-y-4">
 		<TabButtons :buttons="tabs" v-model="tab" />
 
+		<!-- Campus never gets can-delete: unlike Cycle/Education Level/Grade
+		     below, Academic Director/Registrar have no delete permission on
+		     Campus at all (setup/install.py's grants stop at School Director,
+		     which has no Structure scolaire page - a physical-site record is a
+		     School Director-level decision, not Academic Director's). -->
 		<ResourceListPage
 			v-if="tab === 'campuses'"
 			key="campuses"
@@ -26,6 +31,7 @@
 			:list-fields="['name', 'cycle_name', 'education_level.education_level_name']"
 			:columns="[{ fieldname: 'cycle_name', label: 'Nom', emphasize: true }, { fieldname: 'education_level_name', label: 'Niveau' }]"
 			:form-fields="cycleFields"
+			:can-delete="isAcademicDirector"
 		/>
 		<ResourceListPage
 			v-else-if="tab === 'levels'"
@@ -38,6 +44,7 @@
 			search-field="education_level_name"
 			:columns="[{ fieldname: 'education_level_name', label: 'Nom', emphasize: true }, { fieldname: 'school', label: 'École' }]"
 			:form-fields="levelFields"
+			:can-delete="isAcademicDirector"
 		/>
 		<ResourceListPage
 			v-else
@@ -51,6 +58,7 @@
 			:list-fields="['name', 'grade_name', 'cycle.cycle_name', 'stream']"
 			:columns="[{ fieldname: 'grade_name', label: 'Nom', emphasize: true }, { fieldname: 'cycle_name', label: 'Cycle' }, { fieldname: 'stream', label: 'Filière' }]"
 			:form-fields="gradeFields"
+			:can-delete="isAcademicDirector"
 		/>
 	</div>
 </template>
@@ -58,7 +66,13 @@
 <script setup>
 import { ref } from "vue";
 import { TabButtons } from "frappe-ui";
+import { session } from "@/session";
 import ResourceListPage from "@/components/resource/ResourceListPage.vue";
+
+// Registrar (also on this page - see academicNav's hasStructure flag) has
+// read/write/create but not delete on Cycle/Education Level/Grade
+// (setup/install.py's per-doctype grants) - only Academic Director does.
+const isAcademicDirector = session.roles.includes("Academic Director");
 
 const tabs = [
 	{ label: "Campus", value: "campuses" },

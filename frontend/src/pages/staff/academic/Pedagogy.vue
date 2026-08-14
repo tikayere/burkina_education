@@ -13,6 +13,7 @@
 			:list-fields="curriculumListFields"
 			:columns="curriculumColumns"
 			:form-fields="curriculumFields"
+			:can-delete="isAcademicDirector"
 		/>
 		<ResourceListPage
 			v-else-if="tab === 'competencies'"
@@ -26,6 +27,7 @@
 			:list-fields="['name', 'title', 'curriculum.title as curriculum_title', 'code']"
 			:columns="[{ fieldname: 'title', label: 'Titre', emphasize: true }, { fieldname: 'curriculum_title', label: 'Curriculum' }, { fieldname: 'code', label: 'Code' }]"
 			:form-fields="competencyFields"
+			:can-delete="isAcademicDirector"
 		/>
 		<ResourceListPage
 			v-else-if="tab === 'units'"
@@ -39,6 +41,7 @@
 			:list-fields="['name', 'title', 'curriculum.title as curriculum_title', 'estimated_hours']"
 			:columns="[{ fieldname: 'title', label: 'Titre', emphasize: true }, { fieldname: 'curriculum_title', label: 'Curriculum' }, { fieldname: 'estimated_hours', label: 'Heures estimées' }]"
 			:form-fields="unitFields"
+			:can-delete="isAcademicDirector"
 		/>
 		<ResourceListPage
 			v-else-if="tab === 'lessons'"
@@ -52,6 +55,7 @@
 			:list-fields="lessonListFields"
 			:columns="lessonColumns"
 			:form-fields="lessonFields"
+			:can-delete="isAcademicDirector"
 		/>
 		<ResourceListPage
 			v-else-if="tab === 'grading'"
@@ -65,6 +69,7 @@
 			:list-fields="['name', 'scheme_name', 'education_level.education_level_name', 'score_max', 'is_default']"
 			:columns="[{ fieldname: 'scheme_name', label: 'Nom', emphasize: true }, { fieldname: 'education_level_name', label: 'Niveau' }, { fieldname: 'score_max', label: 'Note max.' }, { fieldname: 'is_default', label: 'Par défaut', format: 'check' }]"
 			:form-fields="gradingFields"
+			:can-delete="isAcademicDirector"
 		/>
 		<ResourceListPage
 			v-else
@@ -77,6 +82,7 @@
 			search-field="type_name"
 			:columns="[{ fieldname: 'type_name', label: 'Nom', emphasize: true }, { fieldname: 'category', label: 'Catégorie' }, { fieldname: 'default_coefficient', label: 'Coefficient' }]"
 			:form-fields="assessmentTypeFields"
+			:can-delete="isAcademicDirector"
 		/>
 	</div>
 </template>
@@ -84,7 +90,13 @@
 <script setup>
 import { ref } from "vue";
 import { TabButtons } from "frappe-ui";
+import { session } from "@/session";
 import ResourceListPage from "@/components/resource/ResourceListPage.vue";
+
+// Department Head/Instructor (also on this page via hasPedagogy) have
+// read/write/create but not delete on any of these six doctypes - only
+// Academic Director does (setup/install.py's per-doctype grants).
+const isAcademicDirector = session.roles.includes("Academic Director");
 
 const tabs = [
 	{ label: "Curriculums", value: "curriculum" },

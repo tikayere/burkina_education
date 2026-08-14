@@ -5,13 +5,13 @@
 				<FormControl type="select" label="Classe" v-model="form.student_group" :options="groupOptions" @update:modelValue="onGroupChange" />
 				<FormControl type="select" label="Élève" v-model="form.student" :options="studentOptions" />
 				<FormControl type="textarea" label="Message" v-model="form.message" placeholder="Votre message aux parents..." />
-				<Button variant="solid" theme="red" :loading="sending" @click="send">Envoyer</Button>
+				<Button variant="solid" theme="green" :loading="sending" @click="send">Envoyer</Button>
 			</div>
 		</SectionCard>
 
 		<SectionCard title="Messages reçus" no-padding>
 			<div v-if="loading" class="flex justify-center py-10">
-				<LoadingIndicator class="h-6 w-6 text-bf-red-500" />
+				<LoadingIndicator class="h-6 w-6 text-bf-green-500" />
 			</div>
 			<EmptyState v-else-if="!inbox.length" icon="mail" title="Aucun message" />
 			<ul v-else class="divide-y divide-gray-100">

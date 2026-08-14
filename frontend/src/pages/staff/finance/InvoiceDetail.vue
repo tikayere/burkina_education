@@ -1,6 +1,6 @@
 <template>
 	<div v-if="loading" class="flex justify-center py-20">
-		<LoadingIndicator class="h-6 w-6 text-bf-red-500" />
+		<LoadingIndicator class="h-6 w-6 text-bf-green-500" />
 	</div>
 	<div v-else-if="data" class="space-y-6">
 		<div class="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
@@ -13,7 +13,7 @@
 					<p class="text-xs uppercase tracking-wide text-gray-400">Solde dû</p>
 					<p class="text-xl font-semibold text-gray-900">{{ formatCurrency(data.outstanding_amount, data.currency) }}</p>
 				</div>
-				<Button v-if="data.outstanding_amount > 0" variant="solid" theme="red" @click="openPayDialog">
+				<Button v-if="data.outstanding_amount > 0" variant="solid" theme="green" @click="openPayDialog">
 					Enregistrer un paiement
 				</Button>
 			</div>
@@ -72,7 +72,7 @@
 				</div>
 			</template>
 			<template #actions>
-				<Button variant="solid" theme="red" :loading="paying" class="w-full" @click="submitPayment">Confirmer</Button>
+				<Button variant="solid" theme="green" :loading="paying" class="w-full" @click="submitPayment">Confirmer</Button>
 			</template>
 		</Dialog>
 	</div>

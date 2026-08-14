@@ -1,6 +1,6 @@
 <template>
 	<div v-if="loading" class="flex justify-center py-20">
-		<LoadingIndicator class="h-6 w-6 text-bf-red-500" />
+		<LoadingIndicator class="h-6 w-6 text-bf-green-500" />
 	</div>
 	<div v-else class="space-y-6">
 		<div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -9,6 +9,16 @@
 			<StatCard label="Encaissé ce mois-ci" :value="formatCurrency(data.collected_this_month)" icon="trending-up" tone="green" />
 			<StatCard label="Mobile money en attente" :value="data.pending_mobile_money" icon="smartphone" :tone="data.pending_mobile_money ? 'gold' : 'gray'" />
 		</div>
+
+		<SectionCard title="Encaissements" subtitle="6 derniers mois - paiements reçus">
+			<TrendChart
+				:labels="data.monthly_collections.map((m) => m.label)"
+				:values="data.monthly_collections.map((m) => m.amount)"
+				:format-value="formatCurrency"
+				:min="0"
+				:height="160"
+			/>
+		</SectionCard>
 
 		<div class="grid gap-6 lg:grid-cols-2">
 			<SectionCard title="Factures les plus en retard" no-padding>
@@ -24,17 +34,24 @@
 				</table>
 			</SectionCard>
 
-			<SectionCard title="Recettes par catégorie" no-padding>
+			<SectionCard title="Recettes par catégorie">
 				<EmptyState v-if="!data.by_category.length" icon="pie-chart" title="Aucune donnée" />
-				<table v-else class="w-full text-sm">
-					<tbody class="divide-y divide-gray-100">
-						<tr v-for="c in data.by_category" :key="c.fee_category">
-							<td class="px-5 py-3 font-medium text-gray-800">{{ c.fee_category }}</td>
-							<td class="px-5 py-3 text-gray-500">{{ c.invoice_count }} facture(s)</td>
-							<td class="px-5 py-3 text-right">{{ formatCurrency(c.invoiced_amount) }}</td>
-						</tr>
-					</tbody>
-				</table>
+				<template v-else>
+					<BarChart
+						:data="data.by_category.map((c) => ({ label: c.fee_category, value: c.invoiced_amount }))"
+						:format-value="formatCurrency"
+						:height="150"
+					/>
+					<table class="mt-4 w-full text-sm">
+						<tbody class="divide-y divide-gray-100">
+							<tr v-for="c in data.by_category" :key="c.fee_category">
+								<td class="px-5 py-3 font-medium text-gray-800">{{ c.fee_category }}</td>
+								<td class="px-5 py-3 text-gray-500">{{ c.invoice_count }} facture(s)</td>
+								<td class="px-5 py-3 text-right">{{ formatCurrency(c.invoiced_amount) }}</td>
+							</tr>
+						</tbody>
+					</table>
+				</template>
 			</SectionCard>
 		</div>
 	</div>
@@ -48,6 +65,8 @@ import { formatCurrency, formatDate } from "@/utils/format";
 import StatCard from "@/components/StatCard.vue";
 import SectionCard from "@/components/SectionCard.vue";
 import EmptyState from "@/components/EmptyState.vue";
+import TrendChart from "@/components/charts/TrendChart.vue";
+import BarChart from "@/components/charts/BarChart.vue";
 
 const { data, loading } = useAsync(() => financeApi.dashboard(), {
 	initial: {
@@ -60,6 +79,7 @@ const { data, loading } = useAsync(() => financeApi.dashboard(), {
 		pending_mobile_money: 0,
 		by_category: [],
 		top_overdue: [],
+		monthly_collections: [],
 	},
 });
 </script>

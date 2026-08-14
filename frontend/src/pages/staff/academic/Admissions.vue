@@ -11,6 +11,7 @@
 		:list-fields="LIST_FIELDS"
 		:columns="columns"
 		:form-fields="formFields"
+		:can-delete="isAcademicDirector"
 	>
 		<template #rowActions="{ row }">
 			<div class="flex items-center justify-end gap-2">
@@ -56,7 +57,7 @@
 					v-if="row.application_status === 'Acceptée' && (!row.admission_fee_required || row.admission_fee_paid)"
 					size="sm"
 					variant="solid"
-					theme="red"
+					theme="green"
 					:loading="acting === row.name"
 					@click.stop="enroll(row)"
 				>
@@ -91,7 +92,13 @@
 import { ref } from "vue";
 import { Button } from "frappe-ui";
 import { runDocMethod } from "@/api";
+import { session } from "@/session";
 import { notifyError, notifySuccess } from "@/composables/useAsync";
+
+// Registrar (also on this page) has read/write/create but not delete on
+// Student Applicant - only Academic Director does
+// (setup/install.py::create_admissions_permissions).
+const isAcademicDirector = session.roles.includes("Academic Director");
 import ResourceListPage from "@/components/resource/ResourceListPage.vue";
 
 const listPage = ref(null);
@@ -100,7 +107,7 @@ const acting = ref("");
 const LIST_FIELDS = [
 	"name",
 	"title",
-	"requested_grade",
+	"requested_grade.grade_name",
 	"academic_year",
 	"application_status",
 	"admission_fee_required",
@@ -109,7 +116,7 @@ const LIST_FIELDS = [
 
 const columns = [
 	{ fieldname: "title", label: "Candidat", emphasize: true },
-	{ fieldname: "requested_grade", label: "Classe demandée" },
+	{ fieldname: "grade_name", label: "Classe demandée" },
 	{ fieldname: "academic_year", label: "Année scolaire" },
 	{
 		fieldname: "application_status",

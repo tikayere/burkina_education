@@ -31,6 +31,16 @@ export default {
 					400: "#FCD116",
 					500: "#eab308",
 				},
+				// Marketing site accent (images/burkina_edu.png "Support",
+				// "Demander une démo", WhatsApp CTA) - used sparingly for
+				// secondary highlights, never for primary actions (those are
+				// bf-green) or danger (bf-red).
+				"bf-orange": {
+					50: "#fff4ec",
+					100: "#ffe4cc",
+					500: "#F5821F",
+					600: "#dd6f10",
+				},
 			},
 			fontFamily: {
 				sans: [

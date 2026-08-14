@@ -1,6 +1,6 @@
 <template>
 	<div v-if="loading" class="flex justify-center py-20">
-		<LoadingIndicator class="h-6 w-6 text-bf-red-500" />
+		<LoadingIndicator class="h-6 w-6 text-bf-green-500" />
 	</div>
 	<div v-else class="space-y-6">
 		<SectionCard title="Bulletins trimestriels" no-padding>
@@ -20,7 +20,7 @@
 						<td class="px-5 py-3">{{ r.term_average }} / {{ r.max_average }}</td>
 						<td class="px-5 py-3">{{ r.class_rank ? `${r.class_rank} / ${r.class_size}` : "—" }}</td>
 						<td class="px-5 py-3 text-right">
-							<router-link :to="bulletinRoute(r.name)" class="text-bf-red-600 hover:underline">Voir</router-link>
+							<router-link :to="bulletinRoute(r.name)" class="text-bf-green-600 hover:underline">Voir</router-link>
 						</td>
 					</tr>
 				</tbody>
@@ -48,7 +48,7 @@
 							<StatusBadge :text="r.decision" :tone="r.decision === 'Admis' ? 'green' : r.decision === 'Redouble' ? 'red' : 'gray'" />
 						</td>
 						<td class="px-5 py-3 text-right">
-							<router-link :to="annualRoute(r.name)" class="text-bf-red-600 hover:underline">Voir</router-link>
+							<router-link :to="annualRoute(r.name)" class="text-bf-green-600 hover:underline">Voir</router-link>
 						</td>
 					</tr>
 				</tbody>

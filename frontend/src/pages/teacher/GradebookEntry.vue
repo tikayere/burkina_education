@@ -1,6 +1,6 @@
 <template>
 	<div v-if="loading" class="flex justify-center py-20">
-		<LoadingIndicator class="h-6 w-6 text-bf-red-500" />
+		<LoadingIndicator class="h-6 w-6 text-bf-green-500" />
 	</div>
 	<div v-else-if="sheet" class="space-y-6">
 		<div class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
@@ -8,7 +8,7 @@
 				<h2 class="font-semibold text-gray-900">{{ sheet.plan.assessment_name }}</h2>
 				<p class="text-sm text-gray-500">{{ sheet.plan.course }} · sur {{ sheet.plan.maximum_assessment_score }} points</p>
 			</div>
-			<Button variant="solid" theme="red" :loading="saving" @click="saveAll">Enregistrer les notes</Button>
+			<Button variant="solid" theme="green" :loading="saving" @click="saveAll">Enregistrer les notes</Button>
 		</div>
 
 		<SectionCard title="Saisie" no-padding>

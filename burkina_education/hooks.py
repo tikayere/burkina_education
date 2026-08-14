@@ -6,9 +6,9 @@ app_email = "pourou.2000@gmail.com"
 app_license = "gpl-3.0"
 
 # Desk app icon (Frappe /apps screen, app switcher) - see public/images/logo.svg
-# (Burkina Faso flag colours behind a graduation-cap/book glyph).
+# (green cap / orange book / gold star, matching the marketing mark).
 app_icon = "octicon octicon-mortar-board"
-app_color = "#EF2B2D"
+app_color = "#00863d"
 app_logo_url = "/assets/burkina_education/images/logo.svg"
 # No single module workspace represents the whole app - land on the
 # Desk's own workspace switcher rather than guessing at one.

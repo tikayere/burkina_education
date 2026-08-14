@@ -2,11 +2,11 @@
 	<div v-if="error" class="rounded-lg bg-bf-red-50 p-4 text-sm text-bf-red-600">{{ error }}</div>
 	<div v-else class="space-y-6">
 		<div class="flex justify-end">
-			<Button variant="solid" theme="red" @click="openDialog">Nouveau signalement</Button>
+			<Button variant="solid" theme="green" @click="openDialog">Nouveau signalement</Button>
 		</div>
 
 		<div v-if="loading" class="flex justify-center py-20">
-			<LoadingIndicator class="h-6 w-6 text-bf-red-500" />
+			<LoadingIndicator class="h-6 w-6 text-bf-green-500" />
 		</div>
 		<SectionCard v-else title="Dossiers disciplinaires" no-padding>
 			<EmptyState v-if="!data.length" icon="shield" title="Aucun dossier" />
@@ -49,7 +49,7 @@
 				</div>
 			</template>
 			<template #actions>
-				<Button variant="solid" theme="red" class="w-full" :loading="creating" @click="submitCase">Enregistrer</Button>
+				<Button variant="solid" theme="green" class="w-full" :loading="creating" @click="submitCase">Enregistrer</Button>
 			</template>
 		</Dialog>
 	</div>

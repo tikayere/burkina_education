@@ -119,6 +119,7 @@ const academicRoutes = [
 	{ path: "/", name: "academic-dashboard", component: () => import("@/pages/staff/academic/Dashboard.vue"), meta: { title: "Tableau de bord" } },
 	{ path: "/admissions", name: "academic-admissions", component: () => import("@/pages/staff/academic/Admissions.vue"), meta: { title: "Admissions" } },
 	{ path: "/structure", name: "academic-structure", component: () => import("@/pages/staff/academic/Structure.vue"), meta: { title: "Structure scolaire" } },
+	{ path: "/eleves", name: "academic-students", component: () => import("@/pages/staff/academic/Students.vue"), meta: { title: "Élèves" } },
 	{ path: "/examens", name: "academic-exams", component: () => import("@/pages/staff/academic/Exams.vue"), meta: { title: "Examens" } },
 	{ path: "/pedagogie", name: "academic-pedagogy", component: () => import("@/pages/staff/academic/Pedagogy.vue"), meta: { title: "Pédagogie" } },
 	{ path: "/discipline", name: "academic-discipline", component: () => import("@/pages/staff/academic/Discipline.vue"), meta: { title: "Discipline" } },

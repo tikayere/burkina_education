@@ -13,6 +13,7 @@
 			search-field="title"
 			:columns="bookColumns"
 			:form-fields="bookFields"
+			can-delete
 		/>
 		<ResourceListPage
 			v-else-if="tab === 'copies'"
@@ -24,6 +25,7 @@
 			new-button-label="Nouvel exemplaire"
 			:columns="copyColumns"
 			:form-fields="copyFields"
+			can-delete
 		/>
 		<ResourceListPage
 			v-else-if="tab === 'authors'"
@@ -36,6 +38,7 @@
 			search-field="author_name"
 			:columns="[{ fieldname: 'author_name', label: 'Nom', emphasize: true }]"
 			:form-fields="[{ fieldname: 'author_name', label: 'Nom', type: 'Data', required: true }]"
+			can-delete
 		/>
 		<ResourceListPage
 			v-else
@@ -48,6 +51,7 @@
 			search-field="category_name"
 			:columns="[{ fieldname: 'category_name', label: 'Nom', emphasize: true }]"
 			:form-fields="[{ fieldname: 'category_name', label: 'Nom', type: 'Data', required: true }]"
+			can-delete
 		/>
 	</div>
 </template>

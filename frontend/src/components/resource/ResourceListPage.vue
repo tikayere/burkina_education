@@ -7,19 +7,19 @@
 					v-model="query"
 					type="text"
 					placeholder="Rechercher..."
-					class="w-full rounded-md border-gray-200 py-1.5 pl-8 text-sm focus:border-bf-red-400 focus:ring-bf-red-400"
+					class="w-full rounded-md border-gray-200 py-1.5 pl-8 text-sm focus:border-bf-green-400 focus:ring-bf-green-400"
 					@input="onSearch"
 				/>
 			</div>
 			<div v-else />
-			<Button v-if="canCreate" variant="solid" theme="red" @click="openCreate">
+			<Button v-if="canCreate" variant="solid" theme="green" @click="openCreate">
 				<template #prefix><FeatherIcon name="plus" class="h-4 w-4" /></template>
 				{{ newButtonLabel }}
 			</Button>
 		</div>
 
 		<div v-if="list.loading && !list.data" class="flex justify-center py-20">
-			<LoadingIndicator class="h-6 w-6 text-bf-red-500" />
+			<LoadingIndicator class="h-6 w-6 text-bf-green-500" />
 		</div>
 		<SectionCard v-else no-padding>
 			<EmptyState v-if="!list.data?.length" :icon="icon" :title="emptyTitle" />

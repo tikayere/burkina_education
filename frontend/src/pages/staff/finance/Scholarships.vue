@@ -8,11 +8,21 @@
 		search-field="student_name"
 		:columns="columns"
 		:form-fields="formFields"
+		:can-delete="canDelete"
 	/>
 </template>
 
 <script setup>
+import { session } from "@/session";
 import ResourceListPage from "@/components/resource/ResourceListPage.vue";
+
+// This same component backs both the Finance (Accountant) and Academic
+// (Academic Director) portals (router.js's "academic-scholarships" reuses
+// this file). Accountant has no delete on Scholarship; School
+// Director/Academic Director do (setup/install.py's per-doctype grants) -
+// School Director has no Scholarships page today, but the check is harmless
+// if that changes.
+const canDelete = session.roles.includes("Academic Director") || session.roles.includes("School Director");
 
 const columns = [
 	{ fieldname: "student_name", label: "Élève", emphasize: true },

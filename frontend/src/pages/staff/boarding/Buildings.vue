@@ -14,6 +14,7 @@
 			:list-fields="buildingListFields"
 			:columns="buildingColumns"
 			:form-fields="buildingFields"
+			can-delete
 		/>
 		<ResourceListPage
 			v-else-if="tab === 'rooms'"
@@ -25,6 +26,7 @@
 			new-button-label="Nouvelle chambre"
 			:columns="roomColumns"
 			:form-fields="roomFields"
+			can-delete
 		/>
 		<ResourceListPage
 			v-else
@@ -36,6 +38,7 @@
 			new-button-label="Nouveau lit"
 			:columns="bedColumns"
 			:form-fields="bedFields"
+			can-delete
 		/>
 	</div>
 </template>

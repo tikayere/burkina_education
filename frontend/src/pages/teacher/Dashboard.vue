@@ -1,6 +1,6 @@
 <template>
 	<div v-if="loading" class="flex justify-center py-20">
-		<LoadingIndicator class="h-6 w-6 text-bf-red-500" />
+		<LoadingIndicator class="h-6 w-6 text-bf-green-500" />
 	</div>
 	<div v-else class="space-y-6">
 		<div class="flex items-center gap-4 rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
@@ -27,6 +27,10 @@
 			/>
 		</div>
 
+		<SectionCard v-if="groupsChart.length > 1" title="Élèves par classe">
+			<BarChart :data="groupsChart" />
+		</SectionCard>
+
 		<div class="grid gap-6 lg:grid-cols-2">
 			<SectionCard title="Aujourd'hui">
 				<EmptyState v-if="!data.today_schedule.length" icon="calendar" title="Aucun cours aujourd'hui" />
@@ -40,7 +44,7 @@
 							<span class="text-gray-500">{{ formatTime(s.from_time) }} - {{ formatTime(s.to_time) }}</span>
 							<router-link
 								:to="{ name: 'teacher-attendance', params: { group: s.student_group } }"
-								class="text-bf-red-600 hover:underline"
+								class="text-bf-green-600 hover:underline"
 							>
 								Appel
 							</router-link>
@@ -63,6 +67,7 @@
 </template>
 
 <script setup>
+import { computed } from "vue";
 import { Avatar, LoadingIndicator } from "frappe-ui";
 import { teacherApi } from "@/api";
 import { useAsync } from "@/composables/useAsync";
@@ -71,8 +76,17 @@ import StatCard from "@/components/StatCard.vue";
 import SectionCard from "@/components/SectionCard.vue";
 import EmptyState from "@/components/EmptyState.vue";
 import StatusBadge from "@/components/StatusBadge.vue";
+import BarChart from "@/components/charts/BarChart.vue";
 
 const { data, loading } = useAsync(() => teacherApi.dashboard(), {
 	initial: { instructor: {}, today_schedule: [], announcements: [], groups_count: 0, students_count: 0, open_discipline_cases: 0 },
 });
+
+// Reuses the same whitelisted method Groups.vue calls - only fetched here
+// for the chart, so it's fine if it resolves slightly after the main
+// dashboard payload (the section is hidden until there's >1 group anyway).
+const { data: groups } = useAsync(() => teacherApi.groups(), { initial: [] });
+const groupsChart = computed(() =>
+	groups.value.filter((g) => g.student_count > 0).map((g) => ({ label: g.student_group_name, value: g.student_count })),
+);
 </script>

@@ -1,10 +1,10 @@
 <template>
 	<div class="space-y-6">
 		<div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
-			<StatCard label="Taux (30 jours)" :value="`${summary.last_30_days.percentage}%`" icon="check-square" tone="green" />
-			<StatCard label="Taux (année)" :value="`${summary.this_year.percentage}%`" icon="calendar" tone="gold" />
-			<StatCard label="Absences (30j)" :value="summary.last_30_days.absent" icon="x-circle" tone="red" />
-			<StatCard label="Retards (30j)" :value="summary.last_30_days.late" icon="clock" tone="gray" />
+			<StatCard label="Taux (30 jours)" :value="`${summary.last_30_days.percentage ?? 0}%`" icon="check-square" tone="green" />
+			<StatCard label="Taux (année)" :value="`${summary.this_year.percentage ?? 0}%`" icon="calendar" tone="gold" />
+			<StatCard label="Absences (30j)" :value="summary.last_30_days.absent ?? 0" icon="x-circle" tone="red" />
+			<StatCard label="Retards (30j)" :value="summary.last_30_days.late ?? 0" icon="clock" tone="gray" />
 		</div>
 
 		<SectionCard title="Historique">
@@ -14,7 +14,7 @@
 				<input v-model="toDate" type="date" class="rounded-md border-gray-300 text-sm" @change="reload" />
 			</template>
 			<div v-if="loading" class="flex justify-center py-10">
-				<LoadingIndicator class="h-6 w-6 text-bf-red-500" />
+				<LoadingIndicator class="h-6 w-6 text-bf-green-500" />
 			</div>
 			<EmptyState v-else-if="!records.length" icon="calendar" title="Aucun enregistrement sur cette période" />
 			<table v-else class="w-full text-sm">
@@ -60,7 +60,10 @@ const { data, loading, reload } = useAsync(
 	() => api.value.attendance({ from_date: fromDate.value, to_date: toDate.value }),
 	{
 		watchSource: () => props.student,
-		initial: { summary: { last_30_days: {}, this_year: {} }, records: [] },
+		initial: {
+			summary: { last_30_days: { percentage: 0 }, this_year: { percentage: 0 } },
+			records: [],
+		},
 	},
 );
 

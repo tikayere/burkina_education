@@ -1,6 +1,6 @@
 <template>
 	<div v-if="loading" class="flex justify-center py-20">
-		<LoadingIndicator class="h-6 w-6 text-bf-red-500" />
+		<LoadingIndicator class="h-6 w-6 text-bf-green-500" />
 	</div>
 	<SectionCard v-else title="Annonces" subtitle="Concernant vos enfants." no-padding>
 		<EmptyState v-if="!data.length" icon="bell" title="Aucune annonce" />

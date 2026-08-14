@@ -1,7 +1,7 @@
 <template>
 	<div class="space-y-4">
 		<div v-if="list.loading && !list.data" class="flex justify-center py-20">
-			<LoadingIndicator class="h-6 w-6 text-bf-red-500" />
+			<LoadingIndicator class="h-6 w-6 text-bf-green-500" />
 		</div>
 		<SectionCard v-else title="Affectations internat" no-padding>
 			<EmptyState v-if="!list.data?.length" icon="moon" title="Aucune affectation" />
@@ -24,9 +24,14 @@
 						<td class="px-5 py-3">{{ formatDate(a.check_in_date) }}</td>
 						<td class="px-5 py-3"><StatusBadge :text="a.status" :tone="a.status === 'Actif' ? 'green' : 'gray'" /></td>
 						<td class="px-5 py-3 text-right">
-							<Button v-if="a.status === 'Actif'" size="sm" variant="outline" :loading="acting === a.name" @click="checkOut(a)">
-								Départ
-							</Button>
+							<div class="flex items-center justify-end gap-2">
+								<Button v-if="a.status === 'Actif'" size="sm" variant="outline" :loading="acting === a.name" @click="checkOut(a)">
+									Départ
+								</Button>
+								<button class="p-1.5 text-gray-400 hover:text-bf-red-500" @click="confirmDelete(a)">
+									<FeatherIcon name="trash-2" class="h-4 w-4" />
+								</button>
+							</div>
 						</td>
 					</tr>
 				</tbody>
@@ -37,7 +42,7 @@
 
 <script setup>
 import { ref } from "vue";
-import { Button, LoadingIndicator, createListResource } from "frappe-ui";
+import { Button, FeatherIcon, LoadingIndicator, call, confirmDialog, createListResource } from "frappe-ui";
 import { runDocMethod } from "@/api";
 import { notifyError, notifySuccess } from "@/composables/useAsync";
 import { formatDate } from "@/utils/format";
@@ -67,5 +72,22 @@ async function checkOut(assignment) {
 	} finally {
 		acting.value = "";
 	}
+}
+
+function confirmDelete(row) {
+	confirmDialog({
+		title: "Confirmer la suppression",
+		message: `Voulez-vous vraiment supprimer cette affectation pour « ${row.student_name} » ? Cette action est irréversible.`,
+		onConfirm: async ({ hideDialog }) => {
+			try {
+				await call("frappe.client.delete", { doctype: "Student Boarding Assignment", name: row.name });
+				notifySuccess("Affectation supprimée.");
+				list.reload();
+				hideDialog();
+			} catch (e) {
+				notifyError(e);
+			}
+		},
+	});
 }
 </script>

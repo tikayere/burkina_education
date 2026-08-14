@@ -50,4 +50,11 @@ def get_dashboard():
 			order_by="date desc",
 			limit=8,
 		),
+		# Same "open" Disciplinary Case scope as school.open_discipline_cases
+		# above, just grouped by severity for the dashboard's chart instead of
+		# collapsed to one count.
+		"discipline_by_severity": [
+			{"label": severity, "value": frappe.db.count("Disciplinary Case", {"status": ["!=", "Résolu"], "severity": severity})}
+			for severity in ("Mineure", "Modérée", "Grave")
+		],
 	}

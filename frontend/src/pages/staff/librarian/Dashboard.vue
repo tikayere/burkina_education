@@ -1,10 +1,10 @@
 <template>
 	<div v-if="loading" class="flex justify-center py-20">
-		<LoadingIndicator class="h-6 w-6 text-bf-red-500" />
+		<LoadingIndicator class="h-6 w-6 text-bf-green-500" />
 	</div>
 	<div v-else class="space-y-6">
 		<div class="flex justify-end">
-			<Button variant="solid" theme="red" @click="issueDialogOpen = true">
+			<Button variant="solid" theme="green" @click="issueDialogOpen = true">
 				<template #prefix><FeatherIcon name="plus" class="h-4 w-4" /></template>
 				Emprunter un livre
 			</Button>
@@ -18,6 +18,10 @@
 			<StatCard label="En retard" :value="data.overdue" icon="alert-triangle" :tone="data.overdue ? 'red' : 'gray'" />
 			<StatCard label="Adhérents actifs" :value="data.active_members" icon="user-check" tone="gray" />
 		</div>
+
+		<SectionCard v-if="copiesBreakdown.length" title="Répartition des exemplaires">
+			<DonutChart :data="copiesBreakdown" />
+		</SectionCard>
 
 		<div class="grid gap-6 lg:grid-cols-2">
 			<SectionCard title="À rendre bientôt" no-padding>
@@ -61,7 +65,7 @@
 				</div>
 			</template>
 			<template #actions>
-				<Button variant="solid" theme="red" class="w-full" :loading="issuing" :disabled="member && !member.can_borrow" @click="issue">
+				<Button variant="solid" theme="green" class="w-full" :loading="issuing" :disabled="member && !member.can_borrow" @click="issue">
 					Emprunter
 				</Button>
 			</template>
@@ -70,7 +74,7 @@
 </template>
 
 <script setup>
-import { reactive, ref } from "vue";
+import { computed, reactive, ref } from "vue";
 import { Button, Dialog, FeatherIcon, LoadingIndicator } from "frappe-ui";
 import { librarianApi } from "@/api";
 import { useAsync, notifyError, notifySuccess } from "@/composables/useAsync";
@@ -79,9 +83,22 @@ import StatCard from "@/components/StatCard.vue";
 import SectionCard from "@/components/SectionCard.vue";
 import EmptyState from "@/components/EmptyState.vue";
 import LinkField from "@/components/resource/LinkField.vue";
+import DonutChart from "@/components/charts/DonutChart.vue";
 
 const { data, loading, reload } = useAsync(() => librarianApi.dashboard(), {
 	initial: { books: 0, copies: 0, available: 0, checked_out: 0, overdue: 0, active_members: 0, due_soon: [], overdue_list: [] },
+});
+
+// `checked_out` already includes overdue loans (backend OPEN_STATUSES =
+// Emprunté + En retard) - split it here so the donut's slices don't overlap.
+const copiesBreakdown = computed(() => {
+	const onTime = Math.max(0, data.value.checked_out - data.value.overdue);
+	const parts = [
+		{ label: "Disponibles", value: data.value.available, color: "#1baf7a" },
+		{ label: "Empruntés (à jour)", value: onTime, color: "#2a78d6" },
+		{ label: "En retard", value: data.value.overdue, color: "#e34948" },
+	];
+	return parts.filter((p) => p.value > 0);
 });
 
 const issueDialogOpen = ref(false);

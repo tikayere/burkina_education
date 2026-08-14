@@ -72,7 +72,41 @@ def get_dashboard():
 		"pending_mobile_money": pending_mobile_money,
 		"by_category": by_category,
 		"top_overdue": top_overdue,
+		"monthly_collections": monthly_collections(),
 	}
+
+
+def monthly_collections(months=6):
+	"""Payment Entry receipts, summed by calendar month, for the last
+	``months`` months - powers the finance dashboard's collection-trend
+	chart. Same Payment Entry scope/table ``get_dashboard`` already reads
+	above (``collected_this_month``), just grouped instead of collapsed to
+	one figure - no permission expansion.
+	"""
+	from frappe.utils import add_months, getdate
+
+	from burkina_education.portal.common import MONTH_ABBR_FR
+
+	start = getdate(add_months(nowdate(), -(months - 1))).replace(day=1)
+	rows = frappe.db.sql(
+		"""
+		select date_format(posting_date, '%%Y-%%m') as ym, coalesce(sum(paid_amount), 0) as total
+		from `tabPayment Entry`
+		where docstatus = 1 and payment_type = 'Receive' and posting_date >= %(start)s
+		group by ym
+		""",
+		{"start": start},
+		as_dict=True,
+	)
+	by_month = {r.ym: flt(r.total) for r in rows}
+
+	out = []
+	cursor = start
+	for _ in range(months):
+		key = cursor.strftime("%Y-%m")
+		out.append({"month": key, "label": MONTH_ABBR_FR[cursor.month], "amount": by_month.get(key, 0.0)})
+		cursor = getdate(add_months(cursor, 1))
+	return out
 
 
 @frappe.whitelist()

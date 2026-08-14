@@ -1,10 +1,10 @@
 <template>
 	<div v-if="loading" class="flex justify-center py-20">
-		<LoadingIndicator class="h-6 w-6 text-bf-red-500" />
+		<LoadingIndicator class="h-6 w-6 text-bf-green-500" />
 	</div>
 	<div v-else class="space-y-6">
 		<div class="flex justify-end">
-			<Button variant="solid" theme="red" @click="openAssign">
+			<Button variant="solid" theme="green" @click="openAssign">
 				<template #prefix><FeatherIcon name="plus" class="h-4 w-4" /></template>
 				Affecter un lit
 			</Button>
@@ -16,6 +16,15 @@
 			<StatCard label="Lits" :value="data.beds" icon="moon" tone="gray" />
 			<StatCard label="Occupés" :value="data.occupied" icon="user-check" tone="gold" />
 			<StatCard label="Disponibles" :value="data.available" icon="check-circle" tone="green" />
+		</div>
+
+		<div class="grid gap-6 lg:grid-cols-2">
+			<SectionCard v-if="bedsBreakdown.length" title="Répartition des lits">
+				<DonutChart :data="bedsBreakdown" />
+			</SectionCard>
+			<SectionCard v-if="occupancyChart.length" title="Taux d'occupation par bâtiment">
+				<BarChart :data="occupancyChart" :format-value="(v) => `${v}%`" />
+			</SectionCard>
 		</div>
 
 		<SectionCard title="Occupation par bâtiment" no-padding>
@@ -57,14 +66,14 @@
 				</div>
 			</template>
 			<template #actions>
-				<Button variant="solid" theme="red" class="w-full" :loading="assigning" @click="assign">Affecter</Button>
+				<Button variant="solid" theme="green" class="w-full" :loading="assigning" @click="assign">Affecter</Button>
 			</template>
 		</Dialog>
 	</div>
 </template>
 
 <script setup>
-import { reactive, ref } from "vue";
+import { computed, reactive, ref } from "vue";
 import { Button, Dialog, FeatherIcon, LoadingIndicator } from "frappe-ui";
 import { boardingApi } from "@/api";
 import { useAsync, notifyError, notifySuccess } from "@/composables/useAsync";
@@ -72,10 +81,35 @@ import StatCard from "@/components/StatCard.vue";
 import SectionCard from "@/components/SectionCard.vue";
 import EmptyState from "@/components/EmptyState.vue";
 import LinkField from "@/components/resource/LinkField.vue";
+import DonutChart from "@/components/charts/DonutChart.vue";
+import BarChart from "@/components/charts/BarChart.vue";
 
 const { data, loading, reload } = useAsync(() => boardingApi.dashboard(), {
-	initial: { buildings: 0, rooms: 0, beds: 0, occupied: 0, available: 0, active_assignments: 0, buildings_detail: [] },
+	initial: {
+		buildings: 0,
+		rooms: 0,
+		beds: 0,
+		occupied: 0,
+		available: 0,
+		out_of_service: 0,
+		active_assignments: 0,
+		buildings_detail: [],
+	},
 });
+
+const bedsBreakdown = computed(() =>
+	[
+		{ label: "Occupés", value: data.value.occupied, color: "#eda100" },
+		{ label: "Disponibles", value: data.value.available, color: "#1baf7a" },
+		{ label: "Hors service", value: data.value.out_of_service, color: "#9ca3af" },
+	].filter((p) => p.value > 0),
+);
+
+const occupancyChart = computed(() =>
+	data.value.buildings_detail
+		.filter((b) => b.bed_count > 0)
+		.map((b) => ({ label: b.building_name, value: Math.round((b.occupied_count / b.bed_count) * 100) })),
+);
 
 const assignDialogOpen = ref(false);
 const assigning = ref(false);

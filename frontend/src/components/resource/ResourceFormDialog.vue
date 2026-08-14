@@ -12,7 +12,7 @@
 			</div>
 		</template>
 		<template #actions>
-			<Button variant="solid" theme="red" class="w-full" :loading="saving" @click="save">
+			<Button variant="solid" theme="green" class="w-full" :loading="saving" @click="save">
 				{{ record ? "Enregistrer" : "Créer" }}
 			</Button>
 		</template>

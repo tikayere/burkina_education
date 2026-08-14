@@ -1,6 +1,6 @@
 <template>
 	<div v-if="loading" class="flex justify-center py-20">
-		<LoadingIndicator class="h-6 w-6 text-bf-red-500" />
+		<LoadingIndicator class="h-6 w-6 text-bf-green-500" />
 	</div>
 	<div v-else class="space-y-6">
 		<div v-if="data.structure" class="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -10,12 +10,19 @@
 			<StatCard label="Classes" :value="data.structure.grades" icon="grid" tone="gray" />
 		</div>
 
-		<div v-if="data.admissions" class="grid grid-cols-2 gap-4 sm:grid-cols-4">
-			<StatCard label="Candidatures soumises" :value="data.admissions.submitted" icon="inbox" tone="gray" />
-			<StatCard label="En cours d'examen" :value="data.admissions.under_review" icon="search" tone="gold" />
-			<StatCard label="Prêtes à enrôler" :value="data.admissions.ready_to_enroll" icon="check-circle" :tone="data.admissions.ready_to_enroll ? 'green' : 'gray'" />
-			<StatCard label="Liste d'attente" :value="data.admissions.waitlisted" icon="clock" tone="gray" />
-		</div>
+		<template v-if="data.admissions">
+			<div class="grid grid-cols-2 gap-4 sm:grid-cols-5">
+				<StatCard label="Candidatures soumises" :value="data.admissions.submitted" icon="inbox" tone="gray" />
+				<StatCard label="En cours d'examen" :value="data.admissions.under_review" icon="search" tone="gold" />
+				<StatCard label="Prêtes à enrôler" :value="data.admissions.ready_to_enroll" icon="check-circle" :tone="data.admissions.ready_to_enroll ? 'green' : 'gray'" />
+				<StatCard label="Liste d'attente" :value="data.admissions.waitlisted" icon="clock" tone="gray" />
+				<StatCard label="Inscrits cette année" :value="data.admissions.enrolled_this_year" icon="user-check" tone="green" />
+			</div>
+
+			<SectionCard title="Pipeline des admissions">
+				<BarChart :data="admissionsFunnel" :height="150" />
+			</SectionCard>
+		</template>
 
 		<div v-if="data.exams" class="grid gap-6 lg:grid-cols-2">
 			<SectionCard title="Examens à venir" no-padding>
@@ -53,6 +60,7 @@
 </template>
 
 <script setup>
+import { computed } from "vue";
 import { LoadingIndicator } from "frappe-ui";
 import { academicApi } from "@/api";
 import { useAsync } from "@/composables/useAsync";
@@ -60,6 +68,22 @@ import { formatDate } from "@/utils/format";
 import StatCard from "@/components/StatCard.vue";
 import SectionCard from "@/components/SectionCard.vue";
 import EmptyState from "@/components/EmptyState.vue";
+import BarChart from "@/components/charts/BarChart.vue";
 
 const { data, loading } = useAsync(() => academicApi.dashboard(), { initial: {} });
+
+// Same five counts as the stat cards above, as a funnel bar chart -
+// Application -> Review -> Acceptance -> Admission -> Enrollment
+// (docs/architecture.md section O) reads more clearly as a shape than as
+// four separate numbers.
+const admissionsFunnel = computed(() => {
+	const a = data.value.admissions || {};
+	return [
+		{ label: "Soumises", value: a.submitted || 0 },
+		{ label: "En examen", value: a.under_review || 0 },
+		{ label: "Liste d'attente", value: a.waitlisted || 0 },
+		{ label: "Prêtes", value: a.ready_to_enroll || 0 },
+		{ label: "Inscrites", value: a.enrolled_this_year || 0 },
+	];
+});
 </script>
